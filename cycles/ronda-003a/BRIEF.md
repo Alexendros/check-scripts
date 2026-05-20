@@ -15,11 +15,15 @@
    - `cycles/ronda-003a/antitesis.md` — cuerpo de la crítica + diseño alternativo
    - `cycles/ronda-003a/r17-implementation.sh` — implementación bash ejecutable de R17
    - `cycles/ronda-003a/r17-helper.py` — helper Python si tu diseño lo requiere
-   - `cycles/ronda-003a/workflow-ci-proposed.yml` — propuesta de `.github/workflows/linter.yml` v0.6
+   - `cycles/ronda-003a/workflow-ci-proposed.yml` — propuesta de
+     `.github/workflows/linter.yml` v0.6
    - `cycles/ronda-003a/diff-table.md` — tabla diff 6-8 filas
    - `cycles/ronda-003a/pregunta-ronda-3b.md` — una sola pregunta
-3. **NO modifiques** archivos fuera de `cycles/ronda-003a/`. No toques `skills/`, `docs/`, `README.md`, `.github/workflows/` ni nada de `main`.
-4. **NO abras PR a main** desde esta rama. El draft PR ya existe (#3 cuando esté abierto) y lo gestiona la síntesis.
+3. **NO modifiques** archivos fuera de `cycles/ronda-003a/`.
+   No toques `skills/`, `docs/`, `README.md`, `.github/workflows/`
+   ni nada de `main`.
+4. **NO abras PR a main** desde esta rama. El draft PR ya existe
+   (#3 cuando esté abierto) y lo gestiona la síntesis.
 5. **NO hagas merge ni rebase contra main** desde esta rama.
 
 Cuando hayas commiteado todos los archivos arriba, simplemente **detente**.
@@ -39,12 +43,16 @@ Tu output debe respetarlos en su cuerpo. No menciones productos AI fuera de
 
 ## Diseño tentativo a contrastar (mi tesis)
 
-1. Un solo script `skills/XEK_meta-forge/scripts/xek-meta-forge.sh` en bash que itera todos los `SKILL.md` del repo.
+1. Un solo script `skills/XEK_meta-forge/scripts/xek-meta-forge.sh`
+   en bash que itera todos los `SKILL.md` del repo.
 2. Cada regla R1-R18 implementada como función bash `r1()`...`r18()` con exit `0|1`.
-3. Output JSON consolidado conforme a [`skills/XEK_orquesta/schemas/finding.schema.json`](../../skills/XEK_orquesta/schemas/finding.schema.json).
-4. Modos: `dry-run` lista reglas · `sandbox` audita SKILL.md aislados en tmpfs · `real` audita árbol entero.
+3. Output JSON consolidado conforme a
+   [`skills/XEK_orquesta/schemas/finding.schema.json`](../../skills/XEK_orquesta/schemas/finding.schema.json).
+4. Modos: `dry-run` lista reglas · `sandbox` audita SKILL.md
+   aislados en tmpfs · `real` audita árbol entero.
 5. R17/R18 (validación de schemas YAML/JSON) en Python invocado desde bash · resto bash puro.
-6. Sin instalaciones globales — solo `pip install --user pyyaml jsonschema` documentado en preflight.
+6. Sin instalaciones globales — solo
+   `pip install --user pyyaml jsonschema` documentado en preflight.
 
 ## Contexto de lectura obligatoria
 
