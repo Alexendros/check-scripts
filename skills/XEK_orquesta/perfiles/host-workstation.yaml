@@ -1,0 +1,20 @@
+schema: xek/perfil@v1
+nombre: host-workstation
+target_tipo: host
+descripcion: "Laptop/desktop con escritorio · 15 steps"
+secuencia:
+  - XEK_linux-fs
+  - XEK_linux-secretos
+  - XEK_linux-paquetes
+  - XEK_linux-actualizaciones
+  - XEK_linux-systemd
+  - XEK_linux-seguridad
+  - XEK_linux-red
+  - XEK_linux-vpn
+  - XEK_linux-gpu
+  - XEK_linux-audio
+  - XEK_linux-bluetooth
+  - XEK_linux-energia
+  - XEK_linux-contenedores
+  - XEK_linux-escritorio
+  - XEK_linux-backup

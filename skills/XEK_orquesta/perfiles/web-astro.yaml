@@ -1,0 +1,16 @@
+schema: xek/perfil@v1
+nombre: web-astro
+target_tipo: repo
+descripcion: "Astro estático/SSR · 11 steps"
+secuencia:
+  - XEK_detecta-stack
+  - XEK_repo-higiene
+  - XEK_sast
+  - XEK_astro
+  - XEK_seo
+  - XEK_a11y-web
+  - XEK_perf-web
+  - XEK_cookies
+  - XEK_compliance-rgpd
+  - XEK_integridad
+  - XEK_despliegue

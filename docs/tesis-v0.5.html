@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XEK · Tesis v0.5 · 41 skills · 8 ámbitos · metodología dialéctica IA</title>
+<style>
+  :root {
+    --bg:#f5f1e8; --bg-2:#ebe6d8; --bg-3:#dfd9c8; --paper:#faf6ec;
+    --fg:#2a2620; --fg-2:#4a423a; --fg-dim:#7a7165;
+    --rule:#c9c1ad; --rule-2:#a89e87;
+    --accent:#8b5a2b; --accent-2:#5c3a1c; --warm:#a3622a;
+    --good:#5f7a3f; --bad:#a05a2c; --crit:#8b3a2e; --meta:#6b5c7a;
+    --code-bg:#ebe6d8; --code-fg:#2a2620;
+    --shadow-sm:0 1px 0 rgba(42,38,32,0.08);
+    --shadow-md:0 2px 6px rgba(42,38,32,0.10);
+    --shadow-lg:0 8px 20px rgba(42,38,32,0.12);
+    --hero-grad:linear-gradient(135deg,#ebe6d8 0%,#dfd9c8 100%);
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code","Fira Code",Menlo,monospace;
+    --serif:"Iowan Old Style","Charter","Georgia","Source Serif Pro",serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--fg);line-height:1.6;font-size:15px;font-feature-settings:"kern","liga","calt";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  header.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(180%) blur(12px);-webkit-backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  header.top .inner{max-width:1320px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  header.top .brand{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:12px;color:var(--fg-dim);letter-spacing:0.05em}
+  header.top .brand strong{color:var(--accent);font-size:13px;letter-spacing:0.12em}
+  header.top .brand .ver{color:var(--fg-2);font-weight:500}
+  header.top .meta-r{font-family:var(--mono);font-size:11px;color:var(--fg-dim);letter-spacing:0.08em;text-transform:uppercase}
+  .wrap{display:grid;grid-template-columns:260px 1fr;max-width:1320px;margin:0 auto}
+  @media(max-width:960px){.wrap{grid-template-columns:1fr}}
+  nav.toc{position:sticky;top:58px;align-self:start;height:calc(100vh - 58px);overflow-y:auto;padding:32px 24px 32px 28px;font-size:13px}
+  @media(max-width:960px){nav.toc{position:static;height:auto;padding:20px 24px;border-bottom:1px solid var(--rule)}}
+  nav.toc h2{font-size:10px;text-transform:uppercase;letter-spacing:0.16em;color:var(--fg-dim);margin:0 0 14px;font-weight:700}
+  nav.toc ol{list-style:none;padding:0;margin:0 0 24px;counter-reset:section}
+  nav.toc ol li{counter-increment:section;margin:1px 0;border-radius:6px;transition:background-color 0.15s ease}
+  nav.toc ol li:hover{background:var(--bg-2)}
+  nav.toc ol li a{display:block;padding:6px 10px 6px 36px;color:var(--fg-2);text-decoration:none;position:relative;font-weight:500}
+  nav.toc ol li a::before{content:counter(section,decimal-leading-zero);position:absolute;left:10px;color:var(--fg-dim);font-family:var(--mono);font-size:11px;font-weight:600}
+  nav.toc ol li a:hover{color:var(--accent)}
+  nav.toc .meta{color:var(--fg-dim);font-size:11px;margin-top:24px;padding:14px 12px;background:var(--bg-2);border-radius:8px;line-height:1.7}
+  nav.toc .meta code{font-size:10.5px;color:var(--accent)}
+  main{padding:40px 48px 96px;max-width:920px;width:100%}
+  @media(max-width:960px){main{padding:28px 24px 64px}}
+  .hero{background:var(--hero-grad);border:1px solid var(--rule);border-radius:12px;padding:32px 36px;margin:0 0 48px;position:relative;box-shadow:var(--shadow-md);overflow:hidden}
+  .hero::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
+  .hero .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.14em;text-transform:uppercase;font-weight:700;margin-bottom:12px}
+  .hero .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 24%,transparent)}
+  .hero h1{margin:0 0 12px;font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:-0.02em;line-height:1.18;color:var(--fg)}
+  .hero .lead{color:var(--fg-2);font-size:16px;margin:0;line-height:1.55;max-width:64ch}
+  .hero .lead code{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);padding:1px 7px;border-radius:4px;font-weight:500}
+  .hero .motto{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule);font-family:var(--serif);font-style:italic;font-size:16px;color:var(--fg)}
+  .hero .motto::before{content:"“";font-size:28px;color:var(--accent);margin-right:4px;vertical-align:-8px}
+  .hero .motto::after{content:"”";font-size:28px;color:var(--accent);margin-left:4px;vertical-align:-8px}
+  .hero .delta{margin-top:16px;font-family:var(--mono);font-size:12px;color:var(--fg-dim)}
+  .hero .delta b{color:var(--accent)}
+  section{margin:56px 0 40px}
+  section h2{font-family:var(--serif);font-size:26px;font-weight:600;margin:0 0 6px;padding-bottom:10px;border-bottom:2px solid var(--rule);display:flex;align-items:baseline;gap:14px;letter-spacing:-0.01em}
+  section h2 .num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:700;background:color-mix(in srgb,var(--accent) 10%,transparent);padding:4px 10px;border-radius:6px;letter-spacing:0.06em}
+  section>p:first-of-type{color:var(--fg-2);margin-top:16px}
+  section h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--fg-dim);margin:28px 0 10px}
+  pre,code{font-family:var(--mono);font-size:13px}
+  pre{background:var(--code-bg);color:var(--code-fg);padding:18px 20px;border-radius:10px;border:1px solid var(--rule);overflow-x:auto;line-height:1.55;margin:14px 0;box-shadow:var(--shadow-sm);font-feature-settings:"calt","liga"}
+  pre::-webkit-scrollbar{height:8px}pre::-webkit-scrollbar-thumb{background:var(--rule-2);border-radius:4px}
+  code:not(pre code){background:var(--code-bg);padding:2px 7px;border-radius:4px;font-size:0.9em;color:var(--accent);border:1px solid var(--rule)}
+  .table-wrap{overflow-x:auto;margin:16px 0;border-radius:10px;border:1px solid var(--rule);box-shadow:var(--shadow-sm)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--paper)}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:middle}
+  thead th{background:var(--bg-2);font-weight:700;color:var(--fg-dim);text-transform:uppercase;font-size:10.5px;letter-spacing:0.08em;border-bottom:2px solid var(--rule)}
+  tbody tr{transition:background-color 0.12s ease}tbody tr:hover{background:var(--bg-2)}tbody tr:last-child td{border-bottom:0}
+  tbody tr.group-head td{background:var(--bg-3);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);font-weight:700;padding:8px 14px}
+  td.mono,th.mono{font-family:var(--mono);font-size:12.5px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:760px){.grid-2,.grid-3{grid-template-columns:1fr}}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow-sm);transition:box-shadow 0.18s ease}
+  .card:hover{box-shadow:var(--shadow-md)}
+  .card h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:var(--fg-dim);font-weight:700}
+  .card .v{font-family:var(--mono);font-size:18px;color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .card .v small{font-size:12px;color:var(--fg-dim);font-weight:500;margin-left:4px}
+  .doctrina{background:var(--paper);border:1px solid var(--rule);border-left:4px solid var(--warm);border-radius:0 10px 10px 0;padding:22px 26px;margin:18px 0;box-shadow:var(--shadow-sm)}
+  .doctrina ul{margin:0;padding-left:0;list-style:none;display:grid;gap:10px}
+  .doctrina li{padding:4px 0 4px 32px;position:relative;font-size:14.5px}
+  .doctrina li::before{content:"✓";position:absolute;left:0;top:4px;width:20px;height:20px;color:var(--good);font-weight:800;text-align:center;line-height:20px}
+  .doctrina li strong{font-family:var(--mono);font-size:12.5px;color:var(--accent);margin-right:4px}
+  .sm-wrap{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:28px 20px 20px;margin:18px 0;overflow-x:auto;box-shadow:var(--shadow-sm)}
+  .sm-wrap svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .sm-caption{font-size:12.5px;color:var(--fg-dim);text-align:center;margin-top:10px;font-style:italic}
+  .sm-caption code{background:transparent;border:0;padding:0;color:var(--accent)}
+  .progress-list{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:18px 22px;margin:16px 0;box-shadow:var(--shadow-sm)}
+  .progress{display:grid;grid-template-columns:100px 1fr 220px;gap:14px;align-items:center;padding:8px 0;font-family:var(--mono);font-size:12.5px}
+  .progress+.progress{border-top:1px dashed var(--rule)}
+  .progress .label{color:var(--fg);font-weight:700}
+  .progress .bar{background:var(--bg-3);border-radius:999px;height:8px;overflow:hidden;position:relative}
+  .progress .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--good),color-mix(in srgb,var(--good) 70%,var(--accent)));border-radius:999px;transition:width 0.6s ease}
+  .progress.partial .bar>span{background:linear-gradient(90deg,var(--warm),color-mix(in srgb,var(--warm) 50%,var(--bg-3)))}
+  .progress.empty .bar>span{background:var(--bg-3)}
+  .progress .note{color:var(--fg-dim);font-size:11.5px;text-align:right}
+  .linter{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;box-shadow:var(--shadow-sm);font-family:var(--mono);font-size:12.5px}
+  .linter .row{display:grid;grid-template-columns:44px 1fr 90px;gap:12px;padding:7px 0;align-items:baseline;border-bottom:1px dashed var(--rule)}
+  .linter .row:last-child{border-bottom:0}
+  .linter .id{color:var(--accent);font-weight:700;background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:4px;padding:2px 8px;text-align:center}
+  .linter .row span:nth-child(2){color:var(--fg-2)}.linter .row span:nth-child(2) code{font-size:11.5px}
+  .linter .pass{color:var(--good);text-align:right;font-weight:700;letter-spacing:0.06em}
+  .linter .pass::before{content:"● ";color:var(--good)}
+  .linter .new{border-left:3px solid var(--warm);padding-left:8px;margin-left:-11px}
+  .linter .new .id{background:color-mix(in srgb,var(--warm) 14%,transparent);color:var(--warm)}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:10.5px;font-family:var(--mono);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;border:1px solid currentColor;background:color-mix(in srgb,currentColor 8%,transparent)}
+  .pill.crit{color:var(--crit)}.pill.alto{color:var(--bad)}.pill.medio{color:var(--good)}.pill.meta{color:var(--meta)}.pill.nuevo{color:var(--accent);margin-left:6px}
+  details{background:var(--paper);border:1px solid var(--rule);border-radius:10px;padding:14px 20px;margin:14px 0;box-shadow:var(--shadow-sm)}
+  details>summary{cursor:pointer;font-weight:600;user-select:none;padding:4px 0;color:var(--accent);list-style:none;display:flex;align-items:center;gap:8px}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:"▸";transition:transform 0.2s ease;font-size:12px;color:var(--accent)}
+  details[open]>summary::before{transform:rotate(90deg)}
+  details[open]>summary{border-bottom:1px solid var(--rule);margin-bottom:12px;padding-bottom:10px}
+  .cycle-wrap{background:var(--paper);border:1px solid var(--rule);border-radius:12px;padding:24px 20px;margin:18px 0;box-shadow:var(--shadow-sm);display:flex;justify-content:center}
+  footer.foot{margin-top:80px;padding:24px 0;border-top:1px solid var(--rule);font-size:12px;color:var(--fg-dim)}
+  footer.foot .row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-family:var(--mono)}
+  footer.foot code{color:var(--accent);background:transparent;border:0;padding:0}
+  @media print{
+    header.top,nav.toc{display:none}
+    .wrap{grid-template-columns:1fr;max-width:none}
+    main{padding:0;max-width:none}
+    pre,.card,.sm-wrap,.progress-list,.linter,.doctrina,.cycle-wrap{page-break-inside:avoid;box-shadow:none;border:1px solid #999}
+    details[open]>*,details>*{display:block !important}
+    details>summary::before{display:none}
+    body{font-size:11pt;color:#000;background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <div class="brand"><strong>◈ XEK</strong><span>·</span><span class="ver">tesis v0.5</span><span>·</span><span>2026-05-20</span></div>
+    <span class="meta-r">Cuaderno · xek-cluster · 41 skills · 8 ámbitos</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<nav class="toc" aria-label="Índice">
+  <h2>Índice</h2>
+  <ol>
+    <li><a href="#mapa">Mapa del cluster</a></li>
+    <li><a href="#modos">Máquina de estados</a></li>
+    <li><a href="#matriz">Matriz 41 skills</a></li>
+    <li><a href="#composicion">Composición · 3 capas</a></li>
+    <li><a href="#metodologia">Metodología dialéctica IA</a></li>
+    <li><a href="#perfiles">Perfiles base</a></li>
+    <li><a href="#manifiesto">Manifiesto v2</a></li>
+    <li><a href="#frontmatter">Frontmatter mínimo</a></li>
+    <li><a href="#invariantes">Invariantes</a></li>
+    <li><a href="#linter">Linter meta-forge</a></li>
+    <li><a href="#espiral">Estado espiral</a></li>
+    <li><a href="#brief">Brief Ronda 1</a></li>
+  </ol>
+  <div class="meta">
+    Cuaderno · <code>xek-cluster</code><br>
+    Inicio · 2026-05-20<br>
+    Estado · v0.5 · 41 skills · 8 ámbitos<br>
+    Single-file · sin red
+  </div>
+</nav>
+
+<main>
+
+<header class="hero">
+  <span class="tag">Cluster XEK · tesis v0.5</span>
+  <h1>Catálogo check-only · 41 skills · 8 ámbitos · metodología dialéctica IA</h1>
+  <p class="lead">Verificación sobre <code>repo</code>, <code>app-en-vivo</code> y <code>host</code> · stack web (Next.js, Vite, Turbopack, React, Astro, Remix/RR7) · SEO/cookies/RGPD/licencias · bases SQL/NoSQL · Linux/Host agnóstico de distribución y operador. Incluye protocolo dialéctico tesis → antítesis → síntesis para colaboración multi-IA reproducible y trazable.</p>
+  <p class="motto">XEK verifica y razona — no modifica — emite informe + propuesta.</p>
+  <p class="delta">Δ v0.4 → v0.5 · <b>+15 skills Linux</b> (host agnóstico) · <b>+manifiesto v2</b> (target_tipo · host_huellas) · <b>+4 perfiles host</b> · <b>+2 reglas linter</b> (R15-R16) · <b>+sección metodología dialéctica IA</b></p>
+</header>
+
+<section id="mapa">
+  <h2><span class="num">01</span> Mapa del cluster</h2>
+  <p>Catálogo organizado por ámbito. La fuente de verdad ejecutable vive en <code>scripts/&lt;slug&gt;.sh</code>; adaptadores Python y zsh comparten objetivo del frontmatter.</p>
+<pre>~/.claude/herramientas/skills/
+│
+├─ Foundation ────────────────────────────────────────────────────────
+│   XEK_meta-forge        ▸ forja/audita skills XEK (recursiva)
+│   XEK_detecta-stack     ▸ manifiesto v2 (repo · app-en-vivo · host)
+│   XEK_orquesta          ▸ sequencer de perfiles · resuelve DAG
+│
+├─ Seguridad código ──────────────────────────────────────────────────
+│   XEK_sast · XEK_sca · XEK_dast · XEK_iac (incl. compose)
+│   XEK_integridad · XEK_datos-criticos
+│
+├─ Web genérico ──────────────────────────────────────────────────────
+│   XEK_seo · XEK_a11y-web · XEK_perf-web · XEK_cookies
+│
+├─ Framework específico ──────────────────────────────────────────────
+│   XEK_nextjs · XEK_vite · XEK_turbopack · XEK_react · XEK_astro · XEK_remix
+│
+├─ Compliance · Marca ────────────────────────────────────────────────
+│   XEK_compliance-rgpd · XEK_compliance-licencias · XEK_marca
+│
+├─ Data ──────────────────────────────────────────────────────────────
+│   XEK_db-sql · XEK_db-nosql
+│
+├─ Repo · Despliegue ─────────────────────────────────────────────────
+│   XEK_repo-higiene · XEK_despliegue
+│
+└─ Linux · Host (agnóstico de distro/operador) ───────────────────────
+    XEK_linux-fs             ▸ FHS · permisos · setuid · world-writable
+    XEK_linux-secretos       ▸ history sucio · dotfiles laxos · env exposure
+    XEK_linux-paquetes       ▸ inventario universal (pacman/apt/dnf/zypper/nix + flatpak/snap)
+    XEK_linux-actualizaciones▸ pendientes · reboot pending · kernel mismatch · CVE
+    XEK_linux-systemd        ▸ units · timers · dropins (openrc/runit como fallback)
+    XEK_linux-seguridad      ▸ sysctl · AppArmor/SELinux · módulos kernel · dmesg
+    XEK_linux-red            ▸ firewall · LISTEN · DNS · routing · hosts
+    XEK_linux-vpn            ▸ WireGuard/Tailscale/OpenVPN · DNS leak · split-tunnel
+    XEK_linux-gpu            ▸ NVIDIA/AMD/Intel · drivers · CDI · CUDA/ROCm
+    XEK_linux-audio          ▸ PipeWire/PulseAudio/ALSA · sample rate · grupos
+    XEK_linux-bluetooth      ▸ BlueZ · pairings · firmware updates · scan rogue
+    XEK_linux-energia        ▸ power-profile · TLP/auto-cpufreq · thermal · battery
+    XEK_linux-contenedores   ▸ Docker/Podman/LXC · rootless · networks · imagen scan
+    XEK_linux-escritorio     ▸ DE · extensions · theme · Wayland/X11
+    XEK_linux-backup         ▸ restic/borg/duplicity · offsite · integridad · recovery</pre>
+</section>
+
+<section id="modos">
+  <h2><span class="num">02</span> Máquina de estados · 3 modos con compuertas</h2>
+  <p>Cada skill expone los modos como flag obligatoria. Saltarse el orden exige <code>--override-gate=AUTO_&lt;ts±60s&gt;</code> · fricción intencional contra promociones silenciosas. Skills subordinadas siempre ejecutan en <code>sandbox</code>; promoción a <code>real</code> reservada al operador.</p>
+  <div class="sm-wrap">
+    <svg viewBox="0 0 800 300" role="img" aria-label="Máquina de estados de los 3 modos">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/></marker>
+        <linearGradient id="gDry" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--bg-2)"/><stop offset="100%" stop-color="var(--bg-3)"/></linearGradient>
+        <linearGradient id="gSnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--bg-2)"/><stop offset="100%" stop-color="var(--bg-3)"/></linearGradient>
+        <linearGradient id="gReal" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="color-mix(in srgb,var(--warm) 14%,var(--bg-2))"/><stop offset="100%" stop-color="color-mix(in srgb,var(--warm) 6%,var(--bg-3))"/></linearGradient>
+      </defs>
+      <style>
+        .node-bg{stroke:var(--accent);stroke-width:1.8}.node-bg.real{stroke:var(--warm)}
+        .node-title{font:700 16px var(--mono);fill:var(--fg)}
+        .node-sub{font:12px var(--mono);fill:var(--fg-2)}
+        .node-key{font:700 10px var(--mono);fill:var(--accent);letter-spacing:0.1em;text-transform:uppercase}.node-key.real{fill:var(--warm)}
+        .edge{stroke:var(--accent);stroke-width:1.8;fill:none}
+        .edge-label{font:11px var(--mono);fill:var(--fg-dim)}
+        .gate-text{font:italic 12px var(--sans);fill:var(--crit)}
+        .gate-line{stroke:var(--crit);stroke-width:1.2;stroke-dasharray:4 4;opacity:0.5}
+      </style>
+      <text class="gate-text" x="400" y="28" text-anchor="middle">gate-promoción · avanzar exige modo previo verde</text>
+      <line class="gate-line" x1="40" y1="44" x2="760" y2="44"/>
+      <rect class="node-bg" x="30" y="80" width="220" height="140" rx="10" fill="url(#gDry)"/>
+      <text class="node-key" x="140" y="105" text-anchor="middle">01 · check</text>
+      <text class="node-title" x="140" y="130" text-anchor="middle">dry-run</text>
+      <text class="node-sub" x="140" y="158" text-anchor="middle">disco: ∅</text>
+      <text class="node-sub" x="140" y="178" text-anchor="middle">red: ∅ (cache OK)</text>
+      <text class="node-sub" x="140" y="200" text-anchor="middle">salida: plan stdout</text>
+      <rect class="node-bg" x="290" y="80" width="220" height="140" rx="10" fill="url(#gSnd)"/>
+      <text class="node-key" x="400" y="105" text-anchor="middle">02 · aislado</text>
+      <text class="node-title" x="400" y="130" text-anchor="middle">sandbox</text>
+      <text class="node-sub" x="400" y="158" text-anchor="middle">disco: $XDG_RUNTIME_DIR/</text>
+      <text class="node-sub" x="400" y="178" text-anchor="middle">red: fuentes ✓ target ✗</text>
+      <text class="node-sub" x="400" y="200" text-anchor="middle">bwrap | toolbox | wt</text>
+      <rect class="node-bg real" x="550" y="80" width="220" height="140" rx="10" fill="url(#gReal)"/>
+      <text class="node-key real" x="660" y="105" text-anchor="middle">03 · objetivo</text>
+      <text class="node-title" x="660" y="130" text-anchor="middle">real</text>
+      <text class="node-sub" x="660" y="158" text-anchor="middle">disco: cuaderno/artefactos</text>
+      <text class="node-sub" x="660" y="178" text-anchor="middle">red: target read-only</text>
+      <text class="node-sub" x="660" y="200" text-anchor="middle">+ propuesta_#N</text>
+      <line class="edge" x1="250" y1="150" x2="287" y2="150" marker-end="url(#arr)"/>
+      <text class="edge-label" x="268" y="140" text-anchor="middle">exit 0|1</text>
+      <line class="edge" x1="510" y1="150" x2="547" y2="150" marker-end="url(#arr)" style="stroke:var(--warm)"/>
+      <text class="edge-label" x="528" y="140" text-anchor="middle" style="fill:var(--warm)">exit 0|1</text>
+      <text class="edge-label" x="400" y="265" text-anchor="middle">override · <tspan style="fill:var(--accent);font-weight:700">--override-gate=AUTO_&lt;ts±60s&gt;</tspan> · sin <tspan style="fill:var(--accent)">--mode</tspan> ⇒ exit 3</text>
+    </svg>
+  </div>
+  <p class="sm-caption">Skills <code>XEK_linux-*</code> con escalada usan <code>${XEK_SUDO:-sudo -A}</code> · agnóstico del operador.</p>
+</section>
+
+<section id="matriz">
+  <h2><span class="num">03</span> Matriz · 41 skills XEK</h2>
+  <p>Agrupadas por ámbito. <span class="pill nuevo">nuevo</span> marca entradas v0.5. Severidad refleja peor finding plausible.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="num">#</th><th class="mono">Slug</th><th>Cobertura</th><th>Tools clave</th><th>Severidad</th></tr></thead>
+      <tbody>
+        <tr class="group-head"><td colspan="5">Foundation · 3 skills</td></tr>
+        <tr><td class="num">1</td><td class="mono">XEK_meta-forge</td><td>forja/audita skills XEK</td><td>linter propio · git diff</td><td><span class="pill meta">meta</span></td></tr>
+        <tr><td class="num">2</td><td class="mono">XEK_detecta-stack</td><td>manifiesto v2 (repo · app · host)</td><td>AST · package.json · /etc</td><td><span class="pill meta">meta</span></td></tr>
+        <tr><td class="num">3</td><td class="mono">XEK_orquesta</td><td>sequencer perfiles · DAG</td><td>topological sort · merge JSON</td><td><span class="pill meta">meta</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Seguridad código · 6 skills</td></tr>
+        <tr><td class="num">4</td><td class="mono">XEK_sast</td><td>código estático</td><td>semgrep · gitleaks · codeql</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">5</td><td class="mono">XEK_sca</td><td>deps vulnerables</td><td>pnpm audit · osv-scanner</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">6</td><td class="mono">XEK_dast</td><td>HTTP dinámico</td><td>ZAP baseline · nuclei</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">7</td><td class="mono">XEK_iac</td><td>IaC + contenedores + compose</td><td>checkov · tfsec · trivy · hadolint</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">8</td><td class="mono">XEK_integridad</td><td>cadena de firmas</td><td>sigstore · slsa-verifier</td><td><span class="pill crit">crítico</span></td></tr>
+        <tr><td class="num">9</td><td class="mono">XEK_datos-criticos</td><td>leaks IP/DNS/MCP/path</td><td>regex agresivo + allowlist YAML</td><td><span class="pill crit">crítico</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Web genérico · 4 skills</td></tr>
+        <tr><td class="num">10</td><td class="mono">XEK_seo</td><td>meta · sitemap · JSON-LD · OG</td><td>crawl · structured data</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">11</td><td class="mono">XEK_a11y-web</td><td>WCAG 2.2 AA</td><td>axe-core · pa11y · Lighthouse</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">12</td><td class="mono">XEK_perf-web</td><td>Core Web Vitals · bundle</td><td>Lighthouse CI · source-map-explorer</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">13</td><td class="mono">XEK_cookies</td><td>inventario · CMP · terceros</td><td>headless crawl · document.cookie</td><td><span class="pill alto">alto</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Framework específico · 6 skills</td></tr>
+        <tr><td class="num">14</td><td class="mono">XEK_nextjs</td><td>App Router · RSC · middleware</td><td>AST · next.config.* · server-only</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">15</td><td class="mono">XEK_vite</td><td>config · chunks · env</td><td>vite.config.* · manifest</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">16</td><td class="mono">XEK_turbopack</td><td>bundler · cache · trace</td><td>turbo.json · módulos no soportados</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">17</td><td class="mono">XEK_react</td><td>hooks · keys · hidratación</td><td>ESLint react-hooks · AST</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">18</td><td class="mono">XEK_astro</td><td>islands · content · adapters</td><td>astro.config.* · AST</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">19</td><td class="mono">XEK_remix</td><td>loaders · actions · RR7</td><td>routes scan · AST</td><td><span class="pill medio">medio</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Compliance · Marca · 3 skills</td></tr>
+        <tr><td class="num">20</td><td class="mono">XEK_compliance-rgpd</td><td>RGPD · LOPDGDD · ePrivacy</td><td>checklist BOE · crawl legales</td><td><span class="pill crit">crítico</span></td></tr>
+        <tr><td class="num">21</td><td class="mono">XEK_compliance-licencias</td><td>SPDX · NonCommercial · copyleft</td><td>license-checker · spdx-tools</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">22</td><td class="mono">XEK_marca</td><td>IP by-design</td><td>SPDX headers · NOTICE · watermark</td><td><span class="pill medio">medio</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Data · 2 skills</td></tr>
+        <tr><td class="num">23</td><td class="mono">XEK_db-sql</td><td>esquema · índices · RLS · SSL</td><td>Prisma/Drizzle · pg_stat · sqlfluff</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">24</td><td class="mono">XEK_db-nosql</td><td>esquema implícito · TTL · injection</td><td>Mongo/Firestore · regex injection</td><td><span class="pill alto">alto</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Repo · Despliegue · 2 skills</td></tr>
+        <tr><td class="num">25</td><td class="mono">XEK_repo-higiene</td><td>LICENSE · SECURITY.md · CODEOWNERS</td><td>gh CLI · branch protections API</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">26</td><td class="mono">XEK_despliegue</td><td>postura post-deploy</td><td>curl+jq · sslyze · dig · headers</td><td><span class="pill alto">alto</span></td></tr>
+
+        <tr class="group-head"><td colspan="5">Linux · Host · 15 skills (agnóstico)</td></tr>
+        <tr><td class="num">27</td><td class="mono">XEK_linux-fs <span class="pill nuevo">nuevo</span></td><td>FHS · perms · setuid · world-writable</td><td>find · stat · ACLs</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">28</td><td class="mono">XEK_linux-secretos <span class="pill nuevo">nuevo</span></td><td>history sucio · dotfiles · env</td><td>grep · ps eww · gpg --verify</td><td><span class="pill crit">crítico</span></td></tr>
+        <tr><td class="num">29</td><td class="mono">XEK_linux-paquetes <span class="pill nuevo">nuevo</span></td><td>inventario universal · CVE</td><td>pacman/apt/dnf/zypper/nix · flatpak</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">30</td><td class="mono">XEK_linux-actualizaciones <span class="pill nuevo">nuevo</span></td><td>pendientes · reboot · kernel</td><td>checkupdates · uname · .pacnew</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">31</td><td class="mono">XEK_linux-systemd <span class="pill nuevo">nuevo</span></td><td>units · timers · dropins</td><td>systemctl · list-timers</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">32</td><td class="mono">XEK_linux-seguridad <span class="pill nuevo">nuevo</span></td><td>sysctl · MAC · kernel · dmesg</td><td>sysctl · aa-status/sestatus · lsmod</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">33</td><td class="mono">XEK_linux-red <span class="pill nuevo">nuevo</span></td><td>firewall · LISTEN · DNS</td><td>nft · ss · resolvectl · ip</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">34</td><td class="mono">XEK_linux-vpn <span class="pill nuevo">nuevo</span></td><td>túneles · DNS leak · split-tunnel</td><td>wg · tailscale · openvpn status</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">35</td><td class="mono">XEK_linux-gpu <span class="pill nuevo">nuevo</span></td><td>vendor · drivers · CDI · CUDA/ROCm</td><td>nvidia-smi · rocm-smi · lspci</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">36</td><td class="mono">XEK_linux-audio <span class="pill nuevo">nuevo</span></td><td>servidor audio · sample rate</td><td>pw-cli · pactl · aplay -L</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">37</td><td class="mono">XEK_linux-bluetooth <span class="pill nuevo">nuevo</span></td><td>BlueZ · pairings · firmware</td><td>bluetoothctl · hciconfig · fwupd</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">38</td><td class="mono">XEK_linux-energia <span class="pill nuevo">nuevo</span></td><td>power · thermal · battery</td><td>power-profiles · TLP · sensors · upower</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">39</td><td class="mono">XEK_linux-contenedores <span class="pill nuevo">nuevo</span></td><td>runtime · rootless · networks</td><td>docker/podman · lxc · trivy image</td><td><span class="pill alto">alto</span></td></tr>
+        <tr><td class="num">40</td><td class="mono">XEK_linux-escritorio <span class="pill nuevo">nuevo</span></td><td>DE · extensions · display server</td><td>gsettings/kconfig · loginctl</td><td><span class="pill medio">medio</span></td></tr>
+        <tr><td class="num">41</td><td class="mono">XEK_linux-backup <span class="pill nuevo">nuevo</span></td><td>snapshots · offsite · recovery</td><td>restic · borg · duplicity · rclone</td><td><span class="pill crit">crítico</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="composicion">
+  <h2><span class="num">04</span> Composición · 3 capas</h2>
+  <p>Mecanismo en tres formas. Toda invocación subordinada ejecuta en <code>--mode=sandbox</code> · promoción a <code>real</code> reservada al operador.</p>
+
+  <h3>Capa 1 · <code>depende_de:</code> (call subordinado declarativo)</h3>
+<pre>depende_de:
+  - { slug: XEK_detecta-stack, modo: sandbox, obligatoria: true,  razon: "necesita manifiesto" }
+  - { slug: XEK_sca,           modo: sandbox, obligatoria: false, razon: "enriquece con CVE" }
+contrato_invocacion:
+  modo_subordinado: sandbox
+  promocion_real:   solo_operador
+  consolidacion:    "salida JSON estructurada · merge por slug"</pre>
+
+  <h3>Capa 2 · Perfiles declarativos</h3>
+  <p>Lista versionada de skills aplicables a un tipo de target. <code>XEK_orquesta/perfiles/*.yaml</code>. Detalle en sección 06.</p>
+
+  <h3>Capa 3 · <code>XEK_orquesta</code> (sequencer DAG)</h3>
+  <p>Recibe perfil + target, invoca <code>XEK_detecta-stack</code>, filtra skills no aplicables vía manifiesto, resuelve DAG topológico, ejecuta en sandbox y consolida en propuesta única.</p>
+</section>
+
+<section id="metodologia">
+  <h2><span class="num">05</span> Metodología dialéctica IA · tesis → antítesis → síntesis</h2>
+  <p>Protocolo para que múltiples IA-LLM de código contribuyan al repositorio sin colapsar en eco-cámara ni en divergencia improductiva. La parte normativa nunca nombra productos concretos: usa los <strong>roles</strong> IA-tesis · IA-antítesis · IA-síntesis. La asignación a IAs reales vive en <code>ROSTER.yaml</code> separado.</p>
+
+  <div class="cycle-wrap">
+    <svg viewBox="0 0 720 380" role="img" aria-label="Ciclo dialéctico tesis antítesis síntesis">
+      <defs>
+        <marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="var(--accent)"/></marker>
+      </defs>
+      <style>
+        .cn{fill:var(--paper);stroke-width:2}
+        .cn.t{stroke:var(--accent)}.cn.a{stroke:var(--meta)}.cn.s{stroke:var(--warm)}
+        .ctit{font:700 18px var(--serif);fill:var(--fg)}
+        .crol{font:700 10px var(--mono);fill:var(--accent);letter-spacing:0.16em;text-transform:uppercase}
+        .crol.a{fill:var(--meta)}.crol.s{fill:var(--warm)}
+        .csub{font:11px var(--mono);fill:var(--fg-2)}
+        .carc{stroke:var(--accent);stroke-width:2;fill:none}
+        .clab{font:11px var(--mono);fill:var(--fg-dim)}
+      </style>
+      <circle class="cn t" cx="360" cy="80" r="62"/>
+      <text class="crol" x="360" y="60" text-anchor="middle">rol · 01</text>
+      <text class="ctit" x="360" y="84" text-anchor="middle">IA-tesis</text>
+      <text class="csub" x="360" y="104" text-anchor="middle">propone artefacto</text>
+      <text class="csub" x="360" y="120" text-anchor="middle">+ frontmatter</text>
+      <circle class="cn a" cx="560" cy="280" r="62"/>
+      <text class="crol a" x="560" y="260" text-anchor="middle">rol · 02</text>
+      <text class="ctit" x="560" y="284" text-anchor="middle">IA-antítesis</text>
+      <text class="csub" x="560" y="304" text-anchor="middle">crítica argumentada</text>
+      <text class="csub" x="560" y="320" text-anchor="middle">+ alternativa</text>
+      <circle class="cn s" cx="160" cy="280" r="62"/>
+      <text class="crol s" x="160" y="260" text-anchor="middle">rol · 03</text>
+      <text class="ctit" x="160" y="284" text-anchor="middle">IA-síntesis</text>
+      <text class="csub" x="160" y="304" text-anchor="middle">decide + integra</text>
+      <text class="csub" x="160" y="320" text-anchor="middle">bumpea versión</text>
+      <path class="carc" d="M 415 120 Q 540 160 545 220" marker-end="url(#arrC)"/>
+      <text class="clab" x="540" y="180" text-anchor="middle">artefacto + bitácora</text>
+      <path class="carc" d="M 510 320 Q 360 360 215 320" marker-end="url(#arrC)" style="stroke:var(--meta)"/>
+      <text class="clab" x="360" y="370" text-anchor="middle">crítica + alternativa</text>
+      <path class="carc" d="M 175 220 Q 200 160 305 120" marker-end="url(#arrC)" style="stroke:var(--warm)"/>
+      <text class="clab" x="180" y="180" text-anchor="middle">v(N+1) + diff</text>
+      <text class="clab" x="360" y="200" text-anchor="middle" style="font-style:italic;fill:var(--accent)">↻ ciclo se repite hasta convergencia o abort</text>
+    </svg>
+  </div>
+
+  <h3>Roles · contrato de cada uno</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Rol</th><th>Optimiza por</th><th>Entrega</th><th>Prohibido</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">IA-tesis</td><td>coherencia interna · respeto a doctrina</td><td>artefacto v(N) + frontmatter + bitácora de decisiones</td><td>auto-crítica que paralice publicación</td></tr>
+        <tr><td class="mono">IA-antítesis</td><td>hallar fallos · diferenciarse</td><td>crítica numerada (3-5) + plantilla alternativa + diff razonado</td><td>complacer · clonar la tesis · cosméticos</td></tr>
+        <tr><td class="mono">IA-síntesis</td><td>convergencia trazable</td><td>artefacto v(N+1) + tabla "qué cambió y por qué"</td><td>elegir lado entero sin justificar conflictos</td></tr>
+        <tr><td class="mono">operador</td><td>aprobación humana</td><td>OK explícito que promueve la síntesis a versión publicable</td><td>delegar la aprobación a una IA</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Reglas del protocolo</h3>
+  <div class="doctrina">
+    <ul>
+      <li><strong>rol-único-por-ronda</strong> · misma IA no repite rol consecutivo · evita auto-confirmación</li>
+      <li><strong>bump-por-ronda</strong> · cada ciclo cerrado incrementa semver minor · trazabilidad obligatoria</li>
+      <li><strong>cap-coste-declarado</strong> · cada rol declara <code>coste_max_por_msg</code> en ROSTER · presupuesto auditable</li>
+      <li><strong>abort-tres-rondas</strong> · 3 rondas sin convergencia ⇒ operador decide o se aborta · evita deriva</li>
+      <li><strong>substitución-bump-major</strong> · cambiar la IA asignada a un rol exige bump major · cambio de actor cambia resultado</li>
+      <li><strong>roster-separado</strong> · <code>ROSTER.yaml</code> vive separado del cuerpo · el cuerpo permanece agnóstico</li>
+      <li><strong>diff-trazable</strong> · toda síntesis adjunta tabla "qué cambió y por qué" · sin esto no se promueve</li>
+    </ul>
+  </div>
+
+  <h3>Estructura de <code>ROSTER.yaml</code> (anexo, no en cuerpo del repo)</h3>
+<pre>schema: xek/roster@v1
+proyecto: xek-cluster
+version_protocolo: 0.5
+
+roles:
+  tesis:
+    agente_id: "&lt;identificador único de la IA asignada&gt;"
+    capacidades: [diseno_arquitectonico, redaccion_imperativa, lectura_harness]
+    coste_max_por_msg: USD 0
+    contexto_pre: ["CLAUDE.md", "INDEX.md", "doctrina/"]
+  antitesis:
+    agente_id: "&lt;identificador único de la IA delegada&gt;"
+    capacidades: [critica_contrarian, plantillas_alternativas, code_examples]
+    coste_max_por_msg: USD 5
+    contexto_pre: ["tesis-vN.md"]
+  sintesis:
+    agente_id: "&lt;identificador único de la IA con skill SINTESIS&gt;"
+    capacidades: [merge_doctrinal, tabla_diff, decision_trazable]
+    coste_max_por_msg: USD 0
+    contexto_pre: ["tesis-vN.md", "antitesis-vN.md"]
+
+restricciones:
+  rol_unico_por_ronda:      true
+  bump_por_ronda:           true
+  abort_tres_rondas:        true
+  substitucion_bump_major:  true</pre>
+
+  <h3>Skill propia <code>/SINTESIS</code> que ejecuta el rol IA-síntesis</h3>
+  <p>Vive en <code>skills/SINTESIS/SKILL.md</code> del repo. Define el procedimiento exacto: leer tesis-vN, leer antítesis-vN, generar tabla diff campo por campo, decidir cada conflicto con criterio escrito, emitir v(N+1) + diff + justificación. Imperativa, agnóstica, con <code>referencias_canonicas</code> obligatorias.</p>
+
+  <h3>Artefactos por ronda (estructura en repo)</h3>
+<pre>cycles/
+├── ronda-001/
+│   ├── tesis-v0.5.md
+│   ├── antitesis-v0.5.md
+│   ├── sintesis-v0.6.md
+│   ├── diff.md
+│   └── rendicion.md          # operador firma aquí</pre>
+</section>
+
+<section id="perfiles">
+  <h2><span class="num">06</span> Perfiles base · 12</h2>
+  <p>Listas versionadas de skills en orden topológico. <code>XEK_orquesta</code> filtra cada perfil contra el manifiesto y salta los pasos no aplicables.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="mono">Perfil</th><th>Target</th><th>Skills en orden</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">web-nextjs-prod</td><td>App Next.js</td><td class="mono">detecta-stack → repo-higiene → sast → sca → db-sql → react → nextjs → turbopack → seo → a11y-web → perf-web → cookies → compliance-rgpd → compliance-licencias → integridad → despliegue</td></tr>
+        <tr><td class="mono">web-vite-prod</td><td>SPA Vite/React</td><td class="mono">detecta-stack → repo-higiene → sast → sca → react → vite → seo → a11y-web → perf-web → cookies → compliance-rgpd → integridad → despliegue</td></tr>
+        <tr><td class="mono">web-astro</td><td>Astro</td><td class="mono">detecta-stack → repo-higiene → sast → astro → seo → a11y-web → perf-web → cookies → compliance-rgpd → integridad → despliegue</td></tr>
+        <tr><td class="mono">web-remix</td><td>Remix/RR7</td><td class="mono">detecta-stack → repo-higiene → sast → sca → react → remix → seo → a11y-web → perf-web → cookies → compliance-rgpd → integridad → despliegue</td></tr>
+        <tr><td class="mono">repo-minimo</td><td>Cualquier repo</td><td class="mono">detecta-stack → repo-higiene → sast → sca → integridad → datos-criticos</td></tr>
+        <tr><td class="mono">compliance-eu</td><td>App UE</td><td class="mono">cookies → compliance-rgpd → compliance-licencias → marca</td></tr>
+        <tr><td class="mono">data-layer</td><td>Servicios con BD</td><td class="mono">detecta-stack → sast → datos-criticos → db-sql → db-nosql → iac</td></tr>
+        <tr><td class="mono">pre-deploy</td><td>Gate de CD</td><td class="mono">sast → sca → iac → integridad → despliegue</td></tr>
+        <tr><td class="mono">host-workstation <span class="pill nuevo">nuevo</span></td><td>laptop/desktop DE</td><td class="mono">linux-fs → linux-secretos → linux-paquetes → linux-actualizaciones → linux-systemd → linux-seguridad → linux-red → linux-vpn → linux-gpu → linux-audio → linux-bluetooth → linux-energia → linux-contenedores → linux-escritorio → linux-backup</td></tr>
+        <tr><td class="mono">host-server <span class="pill nuevo">nuevo</span></td><td>server sin DE</td><td class="mono">linux-fs → linux-secretos → linux-paquetes → linux-actualizaciones → linux-systemd → linux-seguridad → linux-red → linux-vpn → linux-contenedores → linux-backup</td></tr>
+        <tr><td class="mono">host-container <span class="pill nuevo">nuevo</span></td><td>server containers</td><td class="mono">linux-fs → linux-paquetes → linux-systemd → linux-seguridad → linux-red → linux-contenedores → linux-backup</td></tr>
+        <tr><td class="mono">host-minimal <span class="pill nuevo">nuevo</span></td><td>embebido · CI</td><td class="mono">linux-fs → linux-secretos → linux-paquetes → linux-systemd → linux-red → linux-backup</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="manifiesto">
+  <h2><span class="num">07</span> Manifiesto v2 · salida de <code>XEK_detecta-stack</code></h2>
+  <p>JSON canónico que el resto del cluster lee. Permite a cada skill declarar <code>aplicabilidad</code> contra el manifiesto y a <code>XEK_orquesta</code> filtrar perfiles. v2 añade <code>target_tipo</code> y <code>host_huellas</code> para skills Linux.</p>
+<pre>{
+  "schema": "xek/manifest@v2",
+  "target": "&lt;path o hostname&gt;",
+  "target_tipo": "repo" | "app-en-vivo" | "host",
+
+  "repo": {                                  # solo si target_tipo == repo
+    "tipo": "monorepo" | "repo-simple" | "library",
+    "gestor_paquetes": "pnpm|npm|yarn|bun",
+    "frameworks": [{nombre, version_min, router}],
+    "lenguajes": [...],
+    "tooling": {linter, formatter, tester, bundler},
+    "data_layer": {sql: [...], nosql: [...]},
+    "infra_huellas": {docker, docker_compose, github_actions, ...}
+  },
+
+  "host_huellas": {                          # solo si target_tipo == host
+    "distro_familia":    "arch|debian|fedora|nixos|alpine|gentoo|unknown",
+    "init":              "systemd|openrc|runit|unknown",
+    "paquete_sys":       ["pacman", "yay"] | ["apt"] | ["dnf"] | ...,
+    "desktop_env":       "gnome|kde|hyprland|xfce|sway|none",
+    "display_server":    "wayland|x11|tty",
+    "container_engines": ["docker", "podman", "lxc"],
+    "gpu_vendor":        "nvidia|amd|intel|hybrid|none",
+    "audio_server":      "pipewire|pulseaudio|alsa|none",
+    "bluetooth":         "bluez|none",
+    "vpn_runtime":       ["tailscale", "wireguard", "openvpn"],
+    "rol":               "workstation|server|embedded|container-host"
+  },
+
+  "audiencia": { "publico": true, "ue": true, "menores": false },
+  "perfiles_aplicables": [...]
+}</pre>
+</section>
+
+<section id="frontmatter">
+  <h2><span class="num">08</span> Frontmatter mínimo viable</h2>
+  <p>Todas las claves listadas son obligatorias. Bloques v0.4: <code>depende_de</code>, <code>contrato_invocacion</code>, <code>aplicabilidad</code>. Bloques v0.5: extensión <code>aplicabilidad</code> con predicados sobre <code>host_huellas</code> + <code>escalada_privilegio</code> agnóstica.</p>
+<pre>slug: XEK_&lt;capa&gt;-&lt;herramienta&gt;
+ambito: SAST|DAST|SCA|IaC|Integridad|Despliegue|Marca|DatosCriticos|
+        SEO|A11y|Performance|Cookies|Framework|Compliance|Data|Repo|Linux|Meta|Orquesta
+estado: borrador|beta|produccion|descatalogado
+version: &lt;semver&gt;
+mejoras_ultima_edicion: [{v, fecha, cambio}]
+
+fuentes_externas:      [{tipo, nombre, version_min, licencia}]
+conexiones_requeridas: [{destino, proto, auth}]
+referencias_canonicas: [{tipo, url, cobertura}]               # ≥1 doc_oficial · ≥1 estandar
+
+areas_criticas:
+  permisos_user:  [...]
+  fhs_tocados:    [...]
+  visual_secrets: [...]
+  zonas_ocultas:  [...]
+
+modos_ejecucion:
+  dry-run:  {proposito, efectos_disco: ∅, efectos_red: ∅, salida}
+  sandbox:  {proposito, aislamiento, efectos_disco, efectos_red, salida}
+  real:     {proposito, precondicion, efectos_disco, efectos_red, salida}
+gate_promocion:
+  regla:    "modo N+1 sólo si modo N exit 0|1 con plan"
+  override: "--override-gate=AUTO_&lt;timestamp ±60s&gt;"
+
+escalada_privilegio:                    # v0.5 · agnóstica del operador
+  comando_template: "${XEK_SUDO:-sudo -A}"
+  cuando_aplica:    "skills XEK_linux-* que requieran lectura privilegiada"
+
+depende_de:                             # v0.4 · capa 1 composición
+  - {slug, modo: sandbox, obligatoria, razon}
+contrato_invocacion:
+  modo_subordinado: sandbox
+  promocion_real:   solo_operador
+  consolidacion:    "json · merge por slug"
+
+aplicabilidad:                          # v0.4 + v0.5 · filtrado por manifiesto
+  cuando: [
+    "manifest.target_tipo == 'host'",
+    "manifest.host_huellas.gpu_vendor != 'none'"           # ejemplo XEK_linux-gpu
+  ]
+  prioridad: alta | media | baja
+  coste_relativo: 1..5
+
+migracion_runtime:
+  bash:   scripts/&lt;slug&gt;.sh
+  python: scripts/&lt;slug&gt;.py
+  zsh:    scripts/&lt;slug&gt;.zsh
+
+triggers:
+  keywords:  [≥3 elementos]
+  contextos: [pre-PR|post-merge|pre-deploy|cron]
+  cron:      "&lt;expresión&gt;"</pre>
+</section>
+
+<section id="invariantes">
+  <h2><span class="num">09</span> Invariantes · qué cumple toda skill XEK</h2>
+  <div class="doctrina">
+    <ul>
+      <li><strong>check-only</strong> · XEK lee y razona · nunca modifica el objetivo</li>
+      <li><strong>trifásica</strong> · dry-run → sandbox → real con compuertas</li>
+      <li><strong>agnóstica IA</strong> · roles funcionales · sin nombres de productos en cuerpo</li>
+      <li><strong>agnóstica operador</strong> · escalada vía <code>${XEK_SUDO:-sudo -A}</code> · sin hardcodear comando local</li>
+      <li><strong>agnóstica distro</strong> · huellas universales en manifiesto v2 · skills filtran por aplicabilidad</li>
+      <li><strong>imperativa</strong> · verbos afirmativos · prohibido condicional</li>
+      <li><strong>canónica</strong> · <code>referencias_canonicas</code> ≥ 1 <code>doc_oficial</code> + ≥ 1 <code>estandar</code></li>
+      <li><strong>migrable</strong> · bash (fuente de verdad) · python · zsh</li>
+      <li><strong>append-only</strong> · <code>mejoras_ultima_edicion</code> acumulativa</li>
+      <li><strong>componible</strong> · invocación subordinada siempre <code>sandbox</code></li>
+      <li><strong>aplicable</strong> · declara <code>aplicabilidad</code> contra manifiesto</li>
+      <li><strong>dialéctica</strong> · contribuciones siguen tesis → antítesis → síntesis con <code>ROSTER.yaml</code> separado</li>
+    </ul>
+  </div>
+</section>
+
+<section id="linter">
+  <h2><span class="num">10</span> Linter de <code>XEK_meta-forge</code> · 16 reglas</h2>
+  <p>Fallo de cualquier regla ⇒ <code>exit 2</code> · escritura bloqueada. R15-R16 nuevas en v0.5.</p>
+  <div class="linter" role="region" aria-label="Reglas del linter">
+    <div class="row"><span class="id">R1</span><span>frontmatter parsea YAML 1.2 sin warnings</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R2</span><span>cuerpo ∋ <code>/\b(debería|podría|convendría)\b/</code> ⇒ 0 hits</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R3</span><span>cuerpo ∌ <code>{claude, devin, anthropic, cognition}</code> fuera de <code>referencias_canonicas</code></span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R4</span><span><code>referencias_canonicas</code> ≥ 1 <code>doc_oficial</code> Y ≥ 1 <code>estandar</code></span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R5</span><span><code>modos_ejecucion</code> completa los 3 estados</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R6</span><span>objetivo ≤ 200 caracteres</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R7</span><span><code>triggers.keywords</code> ≥ 3</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R8</span><span>no escribe fuera de <code>~/.claude/cuadernos/&lt;slug&gt;/</code></span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R9</span><span>recursión · <code>XEK_meta-forge</code> se valida a sí misma</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R10</span><span><code>depende_de.modo</code> ∈ {sandbox} salvo override operador</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R11</span><span>si <code>ambito ∈ {Web, Framework, Compliance}</code>, <code>depende_de</code> incluye <code>XEK_detecta-stack</code></span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R12</span><span>skill emite <code>--output=json</code> con <code>schema: xek/finding@v1</code></span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R13</span><span>perfiles validan DAG sin ciclos</span><span class="pass">PASS</span></div>
+    <div class="row"><span class="id">R14</span><span>toda skill declara <code>aplicabilidad</code></span><span class="pass">PASS</span></div>
+    <div class="row new"><span class="id">R15</span><span><code>XEK_linux-*</code> declara <code>aplicabilidad.cuando ⊇ ["manifest.target_tipo == 'host'"]</code></span><span class="pass">PASS</span></div>
+    <div class="row new"><span class="id">R16</span><span><code>XEK_linux-*</code> con escalada usa <code>${XEK_SUDO:-sudo -A}</code> · prohibido <code>sudo</code> hardcodeado</span><span class="pass">PASS</span></div>
+  </div>
+</section>
+
+<section id="espiral">
+  <h2><span class="num">11</span> Estado de la espiral cooperativa</h2>
+  <p>v0.5 cierra la ronda 0.6 (Linux/Host + metodología dialéctica IA). Pendiente: bootstrap del repo público y disparo de Ronda 1 al rol IA-antítesis.</p>
+  <div class="progress-list">
+    <div class="progress"><span class="label">Ronda 0</span><div class="bar"><span style="width:100%"></span></div><span class="note">tesis v0.3 · 9 skills · ✓</span></div>
+    <div class="progress"><span class="label">Ronda 0.5</span><div class="bar"><span style="width:100%"></span></div><span class="note">tesis v0.4 · 26 skills · ✓</span></div>
+    <div class="progress"><span class="label">Ronda 0.6</span><div class="bar"><span style="width:100%"></span></div><span class="note">tesis v0.5 · 41 skills + dialéctica · ✓</span></div>
+    <div class="progress partial"><span class="label">Bootstrap</span><div class="bar"><span style="width:25%"></span></div><span class="note">repo + audit · pendiente OK operador</span></div>
+    <div class="progress empty"><span class="label">Ronda 1</span><div class="bar"><span style="width:0"></span></div><span class="note">IA-antítesis · cap USD 5</span></div>
+    <div class="progress empty"><span class="label">Ronda 2</span><div class="bar"><span style="width:0"></span></div><span class="note">IA-síntesis · skill /SINTESIS</span></div>
+    <div class="progress empty"><span class="label">Ronda 3+</span><div class="bar"><span style="width:0"></span></div><span class="note">iteración hasta convergencia o abort</span></div>
+  </div>
+
+  <div class="grid-3" style="margin-top:18px">
+    <div class="card"><h4>Skills totales</h4><div class="v">41<small>· 8 ámbitos · 12 perfiles</small></div></div>
+    <div class="card"><h4>Reglas linter</h4><div class="v">16<small>· R1-R16 activas</small></div></div>
+    <div class="card"><h4>Presupuesto</h4><div class="v">USD 0<small>/ 169.25 disponible</small></div></div>
+  </div>
+</section>
+
+<section id="brief">
+  <h2><span class="num">12</span> Brief Ronda 1 · rol IA-antítesis</h2>
+  <p>Pegable a sesión del rol IA-antítesis (cualquier IA delegada externa). Mantiene cap USD 5, prohíbe modificación de disco, exige antítesis sobre v0.5 + metodología dialéctica.</p>
+  <details>
+    <summary>Desplegar brief v0.5 · markdown copy-paste</summary>
+<pre># Rol asignado
+IA-antítesis del cluster XEK v0.5 (41 skills, 8 ámbitos, protocolo
+dialéctico tesis-antítesis-síntesis). Lees ROSTER.yaml para confirmar
+tu identidad. No cambias de rol durante la ronda.
+
+# Objetivo
+Producir crítica argumentada + plantilla alternativa diferenciada
+sobre la tesis v0.5. NO aplicar nada. NO modificar disco.
+
+# Doctrina inviolable
+- XEK = verificación. Skills no modifican el objetivo.
+- Trifásica dry-run → sandbox → real con compuertas.
+- Composición: invocación subordinada siempre sandbox.
+- Agnóstica IA · agnóstica operador (${XEK_SUDO}) · agnóstica distro.
+- Tono imperativo afirmativo. Prohibido condicional.
+- Toda afirmación cita referencias_canonicas. Sin cita ⇒ [VERIFY].
+- Tu rol prohibe complacer. Diferenciarte es el deber.
+
+# Capas v0.5 (41)
+Foundation:        meta-forge · detecta-stack · orquesta
+Seguridad código:  sast · sca · dast · iac · integridad · datos-criticos
+Web genérico:      seo · a11y-web · perf-web · cookies
+Framework:         nextjs · vite · turbopack · react · astro · remix
+Compliance/Marca:  compliance-rgpd · compliance-licencias · marca
+Data:              db-sql · db-nosql
+Repo/Despliegue:   repo-higiene · despliegue
+Linux/Host:        fs · secretos · paquetes · actualizaciones · systemd ·
+                   seguridad · red · vpn · gpu · audio · bluetooth ·
+                   energia · contenedores · escritorio · backup
+
+# Tesis a contrastar
+[PEGAR v0.5 completa]
+
+# Salida exigida (markdown, en este orden)
+1. Crítica · 3-5 puntos con cita, argumento técnico, alternativa.
+   Atención específica:
+   - ¿15 skills Linux es saturación o cobertura justa?
+   - ¿ROSTER.yaml separado vs integrado en frontmatter por skill?
+   - ¿XEK_SUDO env var vs adapter declarativo en frontmatter?
+2. Plantilla alternativa diferenciada en ≥2 ejes estructurales.
+3. XEK_linux-gpu ejemplo con los 3 modos en bash ejecutable +
+   depende_de: XEK_detecta-stack + escalada agnóstica.
+4. Diseño alternativo de la metodología dialéctica.
+5. Tabla diff 8-10 filas.
+6. Una pregunta de mayor reducción de incertidumbre.
+
+# DoD ronda 1
+- [ ] 12 invariantes doctrinales preservados
+- [ ] XEK_linux-gpu: 3 modos + depende_de + escalada agnóstica
+- [ ] referencias_canonicas ≥ 4, ≥1 OWASP/NIST/CWE/WCAG/CIS
+- [ ] grep "debería\|podría\|convendría" → 0 hits
+- [ ] Sin productos AI nombrados fuera de referencias_canonicas/ROSTER
+- [ ] Coste ≤ USD 5
+
+# No ejecutar
+NO clonar · NO instalar · NO tocar disco · NO inventar flags
+NO copiar tesis · NO degradar doctrina · NO cambiar de rol
+
+# Perspectiva
+Ingeniero senior de plataforma, contrarian saludable.
+Tu valor: disentir con argumento técnico, no obedecer.</pre>
+  </details>
+</section>
+
+<footer class="foot">
+  <div class="row">
+    <span>Cuaderno · <code>~/.claude/cuadernos/xek-cluster/</code></span>
+    <span>Tesis v0.5 · 2026-05-20 · 41 skills · 8 ámbitos</span>
+    <span>Single-file · sin build · sin red</span>
+  </div>
+</footer>
+
+</main>
+</div>
+
+</body>
+</html>

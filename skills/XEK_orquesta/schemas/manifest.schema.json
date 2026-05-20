@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Alexendros/xek-cluster/main/skills/XEK_orquesta/schemas/manifest.schema.json",
+  "title": "xek/manifest@v2",
+  "description": "Manifiesto emitido por XEK_detecta-stack. Discrimina target_tipo y declara huellas de repo o host.",
+  "type": "object",
+  "required": ["schema", "target", "target_tipo"],
+  "properties": {
+    "schema": { "type": "string", "const": "xek/manifest@v2" },
+    "target": { "type": "string", "description": "Path absoluto, URL o hostname" },
+    "target_tipo": {
+      "type": "string",
+      "enum": ["repo", "app-en-vivo", "host"]
+    },
+    "repo": {
+      "type": "object",
+      "description": "Presente solo si target_tipo == 'repo'",
+      "properties": {
+        "tipo": { "type": "string", "enum": ["monorepo", "repo-simple", "library"] },
+        "gestor_paquetes": { "type": "string", "enum": ["pnpm", "npm", "yarn", "bun", "pip", "uv", "cargo", "go", "none"] },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["nombre"],
+            "properties": {
+              "nombre": { "type": "string" },
+              "version_min": { "type": "string" },
+              "router": { "type": "string", "enum": ["app", "pages", "file-based", "none"] }
+            }
+          }
+        },
+        "lenguajes": { "type": "array", "items": { "type": "string" } },
+        "tooling": {
+          "type": "object",
+          "properties": {
+            "linter":     { "type": "array", "items": { "type": "string" } },
+            "formatter":  { "type": "array", "items": { "type": "string" } },
+            "tester":     { "type": "array", "items": { "type": "string" } },
+            "bundler":    { "type": ["string", "null"] }
+          }
+        },
+        "data_layer": {
+          "type": "object",
+          "properties": {
+            "sql":   { "type": "array", "items": { "type": "string" } },
+            "nosql": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "infra_huellas": {
+          "type": "object",
+          "properties": {
+            "docker":         { "type": "boolean" },
+            "docker_compose": { "type": "boolean" },
+            "dokploy":        { "type": "boolean" },
+            "vercel":         { "type": "boolean" },
+            "github_actions": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "host_huellas": {
+      "type": "object",
+      "description": "Presente solo si target_tipo == 'host'",
+      "properties": {
+        "distro_familia":    { "type": "string", "enum": ["arch", "debian", "fedora", "nixos", "alpine", "gentoo", "unknown"] },
+        "init":              { "type": "string", "enum": ["systemd", "openrc", "runit", "unknown"] },
+        "paquete_sys":       { "type": "array", "items": { "type": "string" } },
+        "desktop_env":       { "type": "string", "enum": ["gnome", "kde", "hyprland", "xfce", "sway", "none"] },
+        "display_server":    { "type": "string", "enum": ["wayland", "x11", "tty"] },
+        "container_engines": { "type": "array", "items": { "type": "string" } },
+        "gpu_vendor":        { "type": "string", "enum": ["nvidia", "amd", "intel", "hybrid", "none"] },
+        "audio_server":      { "type": "string", "enum": ["pipewire", "pulseaudio", "alsa", "none"] },
+        "bluetooth":         { "type": "string", "enum": ["bluez", "none"] },
+        "vpn_runtime":       { "type": "array", "items": { "type": "string" } },
+        "rol":               { "type": "string", "enum": ["workstation", "server", "embedded", "container-host"] }
+      }
+    },
+    "audiencia": {
+      "type": "object",
+      "properties": {
+        "publico": { "type": "boolean" },
+        "ue":      { "type": "boolean" },
+        "menores": { "type": "boolean" }
+      }
+    },
+    "perfiles_aplicables": { "type": "array", "items": { "type": "string" } }
+  }
+}

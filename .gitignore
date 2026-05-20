@@ -1,0 +1,39 @@
+# Asignación local de IAs por rol — agnosticismo del cuerpo del repo
+ROSTER.yaml
+
+# Sandbox runtime
+.xek-sandbox/
+$XDG_RUNTIME_DIR/xek-sandbox/
+
+# Findings locales (no se commitean por defecto)
+findings/
+*.sarif
+*.findings.json
+
+# Outputs del linter
+.meta-forge-cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node (si algún adaptador usa)
+node_modules/
+.pnpm-store/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Editores
+.vscode/
+.idea/
+*.code-workspace
+
+# Coste por ronda (sensible si se publica)
+cycles/*/coste.csv

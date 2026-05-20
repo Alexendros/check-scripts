@@ -1,0 +1,21 @@
+# CODEOWNERS · XEK cluster
+# Las personas o equipos listados son automáticamente solicitados para revisar
+# PRs que toquen sus archivos. Sintaxis: github.com/path/to/file @owner ...
+
+# Default owner para todo el repo
+*                                    @Alexendros
+
+# Doctrina y metodología — cambios requieren revisión explícita del operador
+METHODOLOGY.md                       @Alexendros
+README.md                            @Alexendros
+SECURITY.md                          @Alexendros
+ROSTER.example.yaml                  @Alexendros
+
+# Foundation skills — cambios estructurales del cluster
+/skills/XEK_meta-forge/              @Alexendros
+/skills/XEK_detecta-stack/           @Alexendros
+/skills/XEK_orquesta/                @Alexendros
+/skills/SINTESIS/                    @Alexendros
+
+# CI workflows — sensible a seguridad
+/.github/workflows/                  @Alexendros

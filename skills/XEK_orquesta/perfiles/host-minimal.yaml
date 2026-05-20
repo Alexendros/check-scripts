@@ -1,0 +1,11 @@
+schema: xek/perfil@v1
+nombre: host-minimal
+target_tipo: host
+descripcion: "Embebido · CI runner · 6 steps"
+secuencia:
+  - XEK_linux-fs
+  - XEK_linux-secretos
+  - XEK_linux-paquetes
+  - XEK_linux-systemd
+  - XEK_linux-red
+  - XEK_linux-backup

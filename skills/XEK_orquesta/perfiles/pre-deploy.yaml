@@ -1,0 +1,10 @@
+schema: xek/perfil@v1
+nombre: pre-deploy
+target_tipo: repo
+descripcion: "Gate de CD · 5 steps"
+secuencia:
+  - XEK_sast
+  - XEK_sca
+  - XEK_iac
+  - XEK_integridad
+  - XEK_despliegue

@@ -1,0 +1,18 @@
+schema: xek/perfil@v1
+nombre: web-vite-prod
+target_tipo: repo
+descripcion: "SPA Vite/React · 13 steps"
+secuencia:
+  - XEK_detecta-stack
+  - XEK_repo-higiene
+  - XEK_sast
+  - XEK_sca
+  - XEK_react
+  - XEK_vite
+  - XEK_seo
+  - XEK_a11y-web
+  - XEK_perf-web
+  - XEK_cookies
+  - XEK_compliance-rgpd
+  - XEK_integridad
+  - XEK_despliegue

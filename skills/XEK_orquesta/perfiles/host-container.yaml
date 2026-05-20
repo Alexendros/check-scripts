@@ -1,0 +1,12 @@
+schema: xek/perfil@v1
+nombre: host-container
+target_tipo: host
+descripcion: "Server orientado containers · 7 steps"
+secuencia:
+  - XEK_linux-fs
+  - XEK_linux-paquetes
+  - XEK_linux-systemd
+  - XEK_linux-seguridad
+  - XEK_linux-red
+  - XEK_linux-contenedores
+  - XEK_linux-backup

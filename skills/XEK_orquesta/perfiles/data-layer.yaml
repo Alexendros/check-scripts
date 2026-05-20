@@ -1,0 +1,11 @@
+schema: xek/perfil@v1
+nombre: data-layer
+target_tipo: repo
+descripcion: "Servicios con base de datos · 6 steps"
+secuencia:
+  - XEK_detecta-stack
+  - XEK_sast
+  - XEK_datos-criticos
+  - XEK_db-sql
+  - XEK_db-nosql
+  - XEK_iac

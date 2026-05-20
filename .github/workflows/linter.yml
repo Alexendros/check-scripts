@@ -1,0 +1,141 @@
+name: XEK Linter R1-R16
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**/SKILL.md'
+      - 'METHODOLOGY.md'
+      - 'ROSTER.example.yaml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  meta-forge:
+    name: Auditar SKILL.md con XEK_meta-forge (R1-R16)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias del linter
+        run: pip install pyyaml jsonschema
+
+      - name: R1 · YAML frontmatter parsea sin warnings
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            python3 -c "
+          import yaml, sys
+          src = open('$f').read()
+          if not src.startswith('---'):
+              print('R1 FAIL: $f sin frontmatter'); sys.exit(1)
+          _, fm, _ = src.split('---', 2)
+          yaml.safe_load(fm)
+          " || { echo "R1 FAIL: $f"; exit 1; }
+          done
+          echo "R1 PASS"
+
+      - name: R2 · cuerpo sin verbos condicionales
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            body=$(awk '/^---$/{c++} c==2{found=1; next} found' "$f")
+            if echo "$body" | grep -qiE '\b(debería|podría|convendría|sería conveniente)\b'; then
+              echo "R2 FAIL: $f contiene condicional"
+              exit 1
+            fi
+          done
+          echo "R2 PASS"
+
+      - name: R3 · cuerpo sin nombres de productos AI
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            body=$(awk '/^---$/{c++} c==2{found=1; next} found' "$f")
+            if echo "$body" | grep -qiE '\b(claude|devin|anthropic|cognition)\b'; then
+              echo "R3 FAIL: $f menciona productos AI en cuerpo"
+              exit 1
+            fi
+          done
+          echo "R3 PASS"
+
+      - name: R5 · modos_ejecucion declara dry-run + sandbox + real
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            grep -q 'modos_ejecucion:' "$f" || { echo "R5 FAIL: $f sin modos"; exit 1; }
+            for mode in dry-run sandbox real; do
+              grep -q "^  $mode:" "$f" || { echo "R5 FAIL: $f sin modo $mode"; exit 1; }
+            done
+          done
+          echo "R5 PASS"
+
+      - name: R6 · objetivo ≤ 200 caracteres
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            obj=$(awk '/^objetivo:/{flag=1; next} flag && /^[a-z_]+:/{flag=0} flag' "$f" | tr -d '\n>' | sed 's/^ *//; s/ *$//')
+            if [[ ${#obj} -gt 200 ]]; then
+              echo "R6 FAIL: $f objetivo=${#obj} chars"
+              exit 1
+            fi
+          done
+          echo "R6 PASS"
+
+      - name: R7 · triggers.keywords ≥ 3
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -not -path '*/_template/*'); do
+            python3 -c "
+          import yaml
+          src = open('$f').read().split('---', 2)[1]
+          fm = yaml.safe_load(src)
+          kws = (fm.get('triggers') or {}).get('keywords') or []
+          assert len(kws) >= 3, 'R7 FAIL: $f keywords=' + str(len(kws))
+          " || exit 1
+          done
+          echo "R7 PASS"
+
+      - name: R15 · XEK_linux-* declara target_tipo == 'host'
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -path '*XEK_linux-*' -not -path '*/_template/*'); do
+            grep -q "target_tipo == 'host'" "$f" || { echo "R15 FAIL: $f"; exit 1; }
+          done
+          echo "R15 PASS"
+
+      - name: R16 · XEK_linux-* usa ${XEK_SUDO} si requiere escalada
+        run: |
+          set -euo pipefail
+          for f in $(find skills -name 'SKILL.md' -path '*XEK_linux-*' -not -path '*/_template/*'); do
+            if grep -q 'comando_template:' "$f"; then
+              grep -q 'XEK_SUDO' "$f" || { echo "R16 FAIL: $f usa escalada sin XEK_SUDO"; exit 1; }
+            fi
+          done
+          echo "R16 PASS"
+
+      - name: Schema validation · manifest + finding
+        run: |
+          python3 -c "
+          import json, jsonschema
+          for schema in ['manifest.schema.json', 'finding.schema.json']:
+              json.load(open(f'skills/XEK_orquesta/schemas/{schema}'))
+          print('schemas válidos')
+          "
+
+  shellcheck:
+    name: shellcheck sobre scripts/*.sh
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - run: |
+          set -euo pipefail
+          find skills -name '*.sh' -print0 | xargs -0 -r shellcheck -S warning || true

@@ -1,0 +1,11 @@
+schema: xek/perfil@v1
+nombre: repo-minimo
+target_tipo: repo
+descripcion: "Cualquier repo · 6 steps"
+secuencia:
+  - XEK_detecta-stack
+  - XEK_repo-higiene
+  - XEK_sast
+  - XEK_sca
+  - XEK_integridad
+  - XEK_datos-criticos

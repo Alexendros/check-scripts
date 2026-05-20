@@ -1,0 +1,9 @@
+schema: xek/perfil@v1
+nombre: compliance-eu
+target_tipo: app-en-vivo
+descripcion: "App con usuarios UE · 4 steps"
+secuencia:
+  - XEK_cookies
+  - XEK_compliance-rgpd
+  - XEK_compliance-licencias
+  - XEK_marca

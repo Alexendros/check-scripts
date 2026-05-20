@@ -1,0 +1,18 @@
+schema: xek/perfil@v1
+nombre: web-remix
+target_tipo: repo
+descripcion: "Remix · React Router 7 · 13 steps"
+secuencia:
+  - XEK_detecta-stack
+  - XEK_repo-higiene
+  - XEK_sast
+  - XEK_sca
+  - XEK_react
+  - XEK_remix
+  - XEK_seo
+  - XEK_a11y-web
+  - XEK_perf-web
+  - XEK_cookies
+  - XEK_compliance-rgpd
+  - XEK_integridad
+  - XEK_despliegue

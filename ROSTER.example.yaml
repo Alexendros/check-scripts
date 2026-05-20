@@ -1,0 +1,70 @@
+schema: xek/roster@v1
+proyecto: xek-cluster
+version_protocolo: 0.5
+# Copia este archivo a ROSTER.yaml (gitignored) y rellena con tus IAs reales.
+# El cuerpo del repositorio NUNCA menciona productos concretos. Aquí sí.
+
+roles:
+
+  tesis:
+    agente_id: "<identificador único de la IA asignada al rol tesis>"
+    # Ejemplos válidos: "anthropic/claude-opus-4-7", "openai/gpt-5-mini",
+    # "google/gemini-2.5-pro", "humano-arquitecto-senior", etc.
+    capacidades:
+      - diseno_arquitectonico
+      - redaccion_imperativa
+      - lectura_harness_completo
+    coste_max_por_msg: USD 0       # interno; ajusta si el agente factura
+    contexto_pre:
+      - "README.md"
+      - "METHODOLOGY.md"
+      - "docs/tesis-v*.html"
+    invariantes_obligatorios:
+      - check_only
+      - imperativa
+      - canonica
+
+  antitesis:
+    agente_id: "<identificador único de la IA delegada al rol antítesis>"
+    # Ejemplo: una IA externa que cobra por sesión y se invoca con cap.
+    capacidades:
+      - critica_contrarian
+      - plantillas_alternativas
+      - code_examples_ejecutables
+    coste_max_por_msg: USD 5
+    contexto_pre:
+      - "cycles/ronda-<NNN>/tesis-vN.md"
+      - "docs/tesis-v*.html"
+    invariantes_obligatorios:
+      - rol_unico_por_ronda
+      - diferenciacion_2_ejes
+      - no_complacer
+
+  sintesis:
+    agente_id: "<identificador único de la IA con skill /SINTESIS>"
+    # Idealmente una IA con contexto largo, capaz de razonar sobre dos
+    # documentos extensos y producir diff trazable.
+    capacidades:
+      - merge_doctrinal
+      - tabla_diff_campo_a_campo
+      - decision_trazable
+      - bump_semver
+    coste_max_por_msg: USD 0
+    contexto_pre:
+      - "cycles/ronda-<NNN>/tesis-vN.md"
+      - "cycles/ronda-<NNN>/antitesis-vN.md"
+      - "skills/SINTESIS/SKILL.md"
+    invariantes_obligatorios:
+      - diff_trazable
+      - sin_lados_enteros
+
+restricciones_globales:
+  rol_unico_por_ronda:      true
+  bump_por_ronda:           true
+  abort_tres_rondas:        true
+  substitucion_bump_major:  true
+
+operador:
+  identidad: "<nombre o handle del operador humano>"
+  contacto:  "<canal de aprobación>"
+  responsabilidad: "firma final en cycles/ronda-<NNN>/rendicion.md"
