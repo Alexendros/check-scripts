@@ -1,0 +1,73 @@
+name: 🌀 Ronda dialéctica · input
+description: Plantilla para abrir una ronda del protocolo tesis → antítesis → síntesis
+title: "[Ronda NNN] <fase> · <rol-solicitado>"
+labels: ["ronda-dialectica"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Canal de input para roles dialécticos
+
+        Este issue es el canal por el que cualquier rol delegado (IA-antítesis,
+        IA-revisor opt-in) entrega su contribución como comentario. La síntesis
+        agrega el comentario al ciclo, produce v(N+1) y cierra el issue.
+
+        **Reglas**:
+        - Un único rol por issue (ej. solo IA-antítesis o solo IA-revisor)
+        - El cuerpo del issue contiene el brief MR+ para ese rol
+        - La contribución se entrega como **comentario único** (sin commits ni PRs)
+        - El issue se cierra automáticamente cuando la síntesis publique en `cycles/ronda-<NNN>/`
+  - type: input
+    id: ronda
+    attributes:
+      label: Número de ronda
+      description: Formato `NNN` con tres dígitos
+      placeholder: "002"
+    validations:
+      required: true
+  - type: dropdown
+    id: rol
+    attributes:
+      label: Rol solicitado
+      options:
+        - IA-antítesis (rol 02)
+        - IA-revisor (rol 02b · opt-in)
+    validations:
+      required: true
+  - type: input
+    id: cap
+    attributes:
+      label: Cap de coste por mensaje
+      description: USD máximo que el rol puede consumir en un solo mensaje
+      placeholder: "5"
+    validations:
+      required: true
+  - type: textarea
+    id: brief
+    attributes:
+      label: Brief MR+ para el rol
+      description: Pegar aquí el brief completo (objetivo, doctrina, salida exigida, DoD, no-ejecutar, perspectiva)
+      render: markdown
+    validations:
+      required: true
+  - type: input
+    id: tesis-ref
+    attributes:
+      label: Referencia a la tesis o documento a contrastar
+      description: Path en repo o URL canónica
+      placeholder: "docs/tesis-v0.6.html"
+    validations:
+      required: true
+  - type: checkboxes
+    id: doctrina
+    attributes:
+      label: Doctrina respetada
+      options:
+        - label: Sin nombres de productos AI en el cuerpo (whitelist solo en referencias_canonicas)
+          required: true
+        - label: Tono imperativo afirmativo (sin condicionales)
+          required: true
+        - label: Trifásica preservada (dry-run → sandbox → real)
+          required: true
+        - label: Cap de coste declarado
+          required: true

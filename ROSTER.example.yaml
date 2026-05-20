@@ -1,32 +1,29 @@
-schema: xek/roster@v1
+schema: xek/roster@v2
 proyecto: xek-cluster
-version_protocolo: 0.5
+version_protocolo: 0.6
 # Copia este archivo a ROSTER.yaml (gitignored) y rellena con tus IAs reales.
-# El cuerpo del repositorio NUNCA menciona productos concretos. Aquí sí.
+# El cuerpo del repositorio NUNCA menciona productos concretos. Aqui si.
 
 roles:
 
   tesis:
-    agente_id: "<identificador único de la IA asignada al rol tesis>"
-    # Ejemplos válidos: "anthropic/claude-opus-4-7", "openai/gpt-5-mini",
-    # "google/gemini-2.5-pro", "humano-arquitecto-senior", etc.
+    agente_id: "<identificador unico de la IA asignada al rol tesis>"
     capacidades:
       - diseno_arquitectonico
       - redaccion_imperativa
       - lectura_harness_completo
-    coste_max_por_msg: USD 0       # interno; ajusta si el agente factura
+    coste_max_por_msg: USD 0
     contexto_pre:
       - "README.md"
       - "METHODOLOGY.md"
       - "docs/tesis-v*.html"
     invariantes_obligatorios:
-      - check_only
-      - imperativa
-      - canonica
+      - { nombre: check_only, regla_linter: null }
+      - { nombre: imperativa, regla_linter: R2 }
+      - { nombre: canonica,   regla_linter: R4 }
 
   antitesis:
-    agente_id: "<identificador único de la IA delegada al rol antítesis>"
-    # Ejemplo: una IA externa que cobra por sesión y se invoca con cap.
+    agente_id: "<identificador unico de la IA delegada al rol antitesis>"
     capacidades:
       - critica_contrarian
       - plantillas_alternativas
@@ -36,14 +33,27 @@ roles:
       - "cycles/ronda-<NNN>/tesis-vN.md"
       - "docs/tesis-v*.html"
     invariantes_obligatorios:
-      - rol_unico_por_ronda
-      - diferenciacion_2_ejes
-      - no_complacer
+      - { nombre: rol_unico_por_ronda, regla_linter: null }
+      - { nombre: diferenciacion_2_ejes, regla_linter: null }
+      - { nombre: no_complacer, regla_linter: null }
+
+  # Rol opt-in introducido en v0.6 · activar solo si agente_id != ""
+  revisor:
+    agente_id: ""                                 # vacio = skip
+    capacidades:
+      - linter_execution
+      - factual_conflict_detection
+    coste_max_por_msg: USD 2
+    contexto_pre:
+      - "cycles/ronda-<NNN>/tesis-vN.md"
+      - "cycles/ronda-<NNN>/antitesis-vN.md"
+      - "skills/XEK_meta-forge/SKILL.md"
+    invariantes_obligatorios:
+      - { nombre: no_decide_merge, regla_linter: null }
+      - { nombre: gate_R1_a_R18, regla_linter: R1 }
 
   sintesis:
-    agente_id: "<identificador único de la IA con skill /SINTESIS>"
-    # Idealmente una IA con contexto largo, capaz de razonar sobre dos
-    # documentos extensos y producir diff trazable.
+    agente_id: "<identificador unico de la IA con skill /SINTESIS>"
     capacidades:
       - merge_doctrinal
       - tabla_diff_campo_a_campo
@@ -53,10 +63,11 @@ roles:
     contexto_pre:
       - "cycles/ronda-<NNN>/tesis-vN.md"
       - "cycles/ronda-<NNN>/antitesis-vN.md"
+      - "cycles/ronda-<NNN>/revision-vN.md"      # si revisor activo
       - "skills/SINTESIS/SKILL.md"
     invariantes_obligatorios:
-      - diff_trazable
-      - sin_lados_enteros
+      - { nombre: diff_trazable, regla_linter: null }
+      - { nombre: sin_lados_enteros, regla_linter: null }
 
 restricciones_globales:
   rol_unico_por_ronda:      true
@@ -66,5 +77,6 @@ restricciones_globales:
 
 operador:
   identidad: "<nombre o handle del operador humano>"
-  contacto:  "<canal de aprobación>"
-  responsabilidad: "firma final en cycles/ronda-<NNN>/rendicion.md"
+  contacto:  "<canal de aprobacion>"
+  responsabilidad: "firma final en cycles/ronda-<NNN>/rendicion.md · al release tag"
+  modo_revision: "asincrono · revision en release tag · auto-implicit-approval entre tags"

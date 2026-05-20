@@ -1,7 +1,7 @@
 schema: xek/perfil@v1
 nombre: host-workstation
 target_tipo: host
-descripcion: "Laptop/desktop con escritorio · 15 steps"
+descripcion: "Laptop/desktop con escritorio · 14 steps"
 secuencia:
   - XEK_linux-fs
   - XEK_linux-secretos
@@ -12,8 +12,7 @@ secuencia:
   - XEK_linux-red
   - XEK_linux-vpn
   - XEK_linux-gpu
-  - XEK_linux-audio
-  - XEK_linux-bluetooth
+  - XEK_linux-peripherals
   - XEK_linux-energia
   - XEK_linux-contenedores
   - XEK_linux-escritorio

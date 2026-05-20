@@ -1,11 +1,11 @@
 # XEK · catálogo check-only de skills de verificación
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.5.0-orange.svg)](docs/tesis-v0.5.html)
-[![Skills](https://img.shields.io/badge/skills-41-green.svg)](#skills)
+[![Version](https://img.shields.io/badge/version-0.6.0-orange.svg)](docs/tesis-v0.5.html)
+[![Skills](https://img.shields.io/badge/skills-40-green.svg)](#skills)
 [![Doctrine](https://img.shields.io/badge/doctrine-check--only-red.svg)](#doctrina)
 
-Cluster de 41 skills de verificación de seguridad, postura y compliance para
+Cluster de 40 skills de verificación de seguridad, postura y compliance para
 repositorios, aplicaciones en vivo y hosts Linux. Diseñado para clientes MCP
 genéricos. Agnóstico de IA, distribución y operador.
 
@@ -74,7 +74,7 @@ xek-cluster/
 ├── docs/
 │   ├── tesis-v0.5.html       ← dossier visual de la tesis vigente
 │   └── ...
-├── skills/                   ← 41 skills + SINTESIS
+├── skills/                   ← 40 skills + SINTESIS
 │   ├── XEK_meta-forge/
 │   ├── XEK_detecta-stack/
 │   ├── XEK_orquesta/
@@ -96,7 +96,7 @@ xek-cluster/
 
 ## Skills
 
-Catálogo de 41 skills agrupadas por ámbito. Cada slug enlaza a su `SKILL.md`.
+Catálogo de 40 skills agrupadas por ámbito. Cada slug enlaza a su `SKILL.md`.
 
 ### Foundation (3)
 - [`XEK_meta-forge`](skills/XEK_meta-forge/SKILL.md) — forja y audita skills XEK
@@ -138,7 +138,7 @@ Catálogo de 41 skills agrupadas por ámbito. Cada slug enlaza a su `SKILL.md`.
 - [`XEK_repo-higiene`](skills/XEK_repo-higiene/SKILL.md) — LICENSE · SECURITY · CODEOWNERS
 - [`XEK_despliegue`](skills/XEK_despliegue/SKILL.md) — postura post-deploy
 
-### Linux · Host · agnóstico (15)
+### Linux · Host · agnóstico (14)
 - [`XEK_linux-fs`](skills/XEK_linux-fs/SKILL.md) — FHS · perms · setuid
 - [`XEK_linux-secretos`](skills/XEK_linux-secretos/SKILL.md) — history · dotfiles · env
 - [`XEK_linux-paquetes`](skills/XEK_linux-paquetes/SKILL.md) — inventario universal
@@ -148,8 +148,7 @@ Catálogo de 41 skills agrupadas por ámbito. Cada slug enlaza a su `SKILL.md`.
 - [`XEK_linux-red`](skills/XEK_linux-red/SKILL.md) — firewall · LISTEN · DNS
 - [`XEK_linux-vpn`](skills/XEK_linux-vpn/SKILL.md) — túneles · DNS leak
 - [`XEK_linux-gpu`](skills/XEK_linux-gpu/SKILL.md) — vendor · drivers · CDI
-- [`XEK_linux-audio`](skills/XEK_linux-audio/SKILL.md) — PipeWire/PulseAudio/ALSA
-- [`XEK_linux-bluetooth`](skills/XEK_linux-bluetooth/SKILL.md) — BlueZ · pairings
+- [`XEK_linux-peripherals`](skills/XEK_linux-peripherals/SKILL.md) — audio+bluetooth (D-Bus unificado · fusión v0.6)
 - [`XEK_linux-energia`](skills/XEK_linux-energia/SKILL.md) — power · thermal · battery
 - [`XEK_linux-contenedores`](skills/XEK_linux-contenedores/SKILL.md) — Docker/Podman/LXC
 - [`XEK_linux-escritorio`](skills/XEK_linux-escritorio/SKILL.md) — DE · extensions
@@ -185,6 +184,28 @@ El repositorio se desarrolla por **ciclos dialécticos**: una IA (rol IA-tesis)
 propone, otra (rol IA-antítesis) critica con alternativa, una tercera (rol
 IA-síntesis) integra y bumpea versión. La asignación concreta vive en
 `ROSTER.yaml` (no versionado, copia desde `ROSTER.example.yaml`).
+
+### Canal operativo
+
+Para que el ciclo avance sin relay manual entre canales externos y este
+repositorio, todo input dialéctico se entrega vía **GitHub Issues** etiquetados
+`ronda-dialectica`:
+
+1. La síntesis abre un issue con la plantilla
+   [`ronda.yml`](.github/ISSUE_TEMPLATE/ronda.yml) describiendo el rol
+   solicitado, el brief MR+ y el cap de coste.
+2. El rol delegado (IA-antítesis · IA-revisor) entrega su contribución como
+   **comentario único** en el issue, sin commits ni PRs.
+3. La síntesis procesa el comentario, publica en `cycles/ronda-<NNN>/` y
+   cierra el issue con referencia al commit.
+4. El operador revisa al cerrar release tag, no en cada ronda.
+
+Reglas duras del canal:
+- Un único rol por issue.
+- El operador no actúa como relay. La síntesis lee directamente del comentario.
+- Si el rol delegado quiere proponer código, lo hace **como bloque dentro del
+  comentario** — nunca como PR (la síntesis decide qué se materializa en el
+  árbol).
 
 ## Licencia
 
