@@ -22,7 +22,11 @@
 4. **NO abras PR a main** desde esta rama. El draft PR ya existe (#3 cuando esté abierto) y lo gestiona la síntesis.
 5. **NO hagas merge ni rebase contra main** desde esta rama.
 
-Cuando hayas commiteado todos los archivos arriba, simplemente **detente**. La síntesis (rol 03) lee los commits, los procesa, genera `cycles/ronda-003a/sintesis-v0.7.md` + `diff.md` en otra rama y cierra el draft PR sin merge.
+Cuando hayas commiteado todos los archivos arriba, simplemente **detente**.
+La síntesis (rol 03) lee los commits, los procesa, genera
+`cycles/ronda-003a/sintesis-v0.7.md` + `diff.md` en otra rama y cierra el
+draft PR sin merge.
+
 
 ## Doctrina inviolable (12 invariantes)
 
