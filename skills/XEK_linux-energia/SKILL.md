@@ -2,10 +2,11 @@
 slug: XEK_linux-energia
 ambito: Linux
 maestria_funcional: revisor
-estado: borrador
-version: 0.0.1
+estado: stub
+version: 0.6.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
+  - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
 
 objetivo: >
   power-profiles · TLP/auto-cpufreq · thermal · battery wear.
