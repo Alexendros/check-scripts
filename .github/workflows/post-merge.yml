@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   run:
-    uses: Alexendros/plantillas/.github/workflows/_lib-post-merge.yml@be5a8dd
+    uses: Alexendros/plantillas/.github/workflows/_lib-post-merge.yml@main
     with:
       enable_linters: true
       enable_sbom: true
