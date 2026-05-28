@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Discussions · preguntas y conversaciones"
+    url: "https://github.com/alexendros/xek-cluster/discussions"
+    about: "Para preguntas de uso o conversación abierta usa Discussions."
+  - name: "Reporte de vulnerabilidad de seguridad"
+    url: "https://github.com/alexendros/xek-cluster/security/policy"
+    about: "Sigue SECURITY.md. NO abras issues públicos para vulnerabilidades."
+  - name: "Contacto comercial o de licencia"
+    url: "mailto:contacto@alexendros.me"
+    about: "Asuntos comerciales, licencia o soporte fuera de issues."
