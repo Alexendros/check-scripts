@@ -3,10 +3,11 @@ slug: XEK_iac
 ambito: IaC
 maestria_funcional: revisor
 estado: stub
-version: 0.6.1
+version: 0.6.2
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
+  - { v: 0.6.2, fecha: 2026-06-06, cambio: "formalizado Scope exclusivo frente a XEK_linux-contenedores: iac audita artefactos declarativos en repo, contenedores audita runtime en host" }
 
 objetivo: >
   escaneo de IaC + contenedores + docker-compose (checkov · tfsec · trivy · hadolint).
@@ -77,6 +78,18 @@ triggers:
 # Objetivo
 
 escaneo de IaC + contenedores + docker-compose (checkov · tfsec · trivy · hadolint).
+
+# Scope exclusivo
+
+`XEK_iac` audita **artefactos declarativos versionados dentro de un repositorio**
+(`target_tipo == 'repo'`): Dockerfiles, `compose.yaml`, manifiestos Terraform/IaC, Helm charts.
+Comprueba la *definición como código*, en estático, sin daemon en marcha.
+
+El **runtime de contenedores en un host** (engines Docker/Podman/LXC instalados, daemons,
+sockets, rootless, redes activas, escaneo de imágenes desplegadas) es competencia exclusiva de
+[`XEK_linux-contenedores`](../XEK_linux-contenedores/SKILL.md) (`target_tipo == 'host'`). La
+frontera Docker/Compose se resuelve por `target_tipo`: **repo = archivos, host = runtime**. No
+hay solape de checks entre ambas en una orquestación.
 
 # Estado
 
