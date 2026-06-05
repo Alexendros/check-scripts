@@ -11,8 +11,8 @@ mejoras_ultima_edicion:
 
 objetivo: >
   Detectar el tipo de target (repo|app-en-vivo|host) e inspeccionar sus huellas
-  para emitir un manifiesto conforme a xek/manifest@v2. El manifiesto alimenta
-  la aplicabilidad declarativa de los 40 skills del cluster.
+  para emitir un manifiesto xek/manifest@v2 que alimenta la aplicabilidad
+  declarativa del resto de skills.
 
 precondiciones_runtime:
   binarios:
