@@ -41,7 +41,7 @@ escalada:
   registrar_en_finding: true
 
 referencias_canonicas:
-  - { tipo: doc_oficial, url: "https://raw.githubusercontent.com/Alexendros/xek-cluster/main/skills/XEK_orquesta/schemas/manifest.schema.json", cobertura: "Schema xek/manifest@v2 · campos requeridos y enum de target_tipo" }
+  - { tipo: doc_oficial, url: "https://raw.githubusercontent.com/Alexendros/check-scripts/main/skills/XEK_orquesta/schemas/manifest.schema.json", cobertura: "Schema xek/manifest@v2 · campos requeridos y enum de target_tipo" }
   - { tipo: doc_oficial, url: "https://docs.npmjs.com/cli/v10/configuring-npm/package-json", cobertura: "Estructura package.json · frameworks · gestores de paquetes" }
   - { tipo: estandar,    url: "https://www.freedesktop.org/software/systemd/man/latest/os-release.html", cobertura: "spec /etc/os-release · ID + ID_LIKE para detección distro agnóstica" }
   - { tipo: estandar,    url: "https://specifications.freedesktop.org/desktop-entry-spec/latest/", cobertura: "XDG base dirs · detección desktop_env via DISPLAY + WAYLAND_DISPLAY" }

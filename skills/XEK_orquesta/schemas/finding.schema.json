@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/Alexendros/xek-cluster/main/skills/XEK_orquesta/schemas/finding.schema.json",
+  "$id": "https://raw.githubusercontent.com/Alexendros/check-scripts/main/skills/XEK_orquesta/schemas/finding.schema.json",
   "title": "xek/finding@v1",
   "description": "Salida JSON estructurada de cualquier skill XEK · merge por slug",
   "type": "object",

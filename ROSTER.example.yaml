@@ -1,5 +1,5 @@
 schema: xek/roster@v2
-proyecto: xek-cluster
+proyecto: check-scripts
 version_protocolo: 0.6
 # Copia este archivo a ROSTER.yaml (gitignored) y rellena con tus IAs reales.
 # El cuerpo del repositorio NUNCA menciona productos concretos. Aqui si.
