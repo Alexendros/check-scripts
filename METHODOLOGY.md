@@ -5,6 +5,25 @@ normativa **nunca** nombra productos concretos: usa los **roles**
 `IA-tesis` · `IA-antítesis` · `IA-síntesis`. La asignación a IAs reales vive
 en [`ROSTER.yaml`](ROSTER.example.yaml) (no versionado).
 
+## Invariantes del sistema
+
+Fuente normativa única. Toda skill XEK cumple las 12 invariantes check-only:
+
+1. **check-only** — lee y razona, nunca modifica el objetivo
+2. **trifásica** — dry-run → sandbox → real con compuertas
+3. **agnóstica IA** — roles funcionales, sin productos en cuerpo
+4. **agnóstica operador** — escalada vía `${XEK_SUDO:-sudo -A}`
+5. **agnóstica distro** — huellas universales en manifiesto v2
+6. **imperativa** — verbos afirmativos, prohibido condicional
+7. **canónica** — `referencias_canonicas` ≥ 1 doc oficial + ≥ 1 estándar
+8. **migrable** — bash (fuente de verdad) + python + zsh
+9. **append-only** — `mejoras_ultima_edicion` acumulativa
+10. **componible** — invocación subordinada siempre sandbox
+11. **aplicable** — declara `aplicabilidad` contra manifiesto
+12. **dialéctica** — contribuciones siguen tesis → antítesis → síntesis
+
+Detalle visual de la doctrina: [`docs/tesis-v0.5.html`](docs/tesis-v0.5.html).
+
 ## Premisa
 
 Una sola IA acumula sesgos: confirma sus propias premisas, evita autocrítica
