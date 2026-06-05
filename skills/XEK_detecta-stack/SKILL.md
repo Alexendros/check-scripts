@@ -11,8 +11,8 @@ mejoras_ultima_edicion:
 
 objetivo: >
   Detectar el tipo de target (repo|app-en-vivo|host) e inspeccionar sus huellas
-  para emitir un manifiesto conforme a xek/manifest@v2. El manifiesto alimenta
-  la aplicabilidad declarativa de los 40 skills del cluster.
+  para emitir un manifiesto xek/manifest@v2 que alimenta la aplicabilidad
+  declarativa del resto de skills.
 
 precondiciones_runtime:
   binarios:
@@ -41,7 +41,7 @@ escalada:
   registrar_en_finding: true
 
 referencias_canonicas:
-  - { tipo: doc_oficial, url: "https://raw.githubusercontent.com/Alexendros/xek-cluster/main/skills/XEK_orquesta/schemas/manifest.schema.json", cobertura: "Schema xek/manifest@v2 · campos requeridos y enum de target_tipo" }
+  - { tipo: doc_oficial, url: "https://raw.githubusercontent.com/Alexendros/check-scripts/main/skills/XEK_orquesta/schemas/manifest.schema.json", cobertura: "Schema xek/manifest@v2 · campos requeridos y enum de target_tipo" }
   - { tipo: doc_oficial, url: "https://docs.npmjs.com/cli/v10/configuring-npm/package-json", cobertura: "Estructura package.json · frameworks · gestores de paquetes" }
   - { tipo: estandar,    url: "https://www.freedesktop.org/software/systemd/man/latest/os-release.html", cobertura: "spec /etc/os-release · ID + ID_LIKE para detección distro agnóstica" }
   - { tipo: estandar,    url: "https://specifications.freedesktop.org/desktop-entry-spec/latest/", cobertura: "XDG base dirs · detección desktop_env via DISPLAY + WAYLAND_DISPLAY" }

@@ -3,10 +3,11 @@ slug: XEK_turbopack
 ambito: Framework
 maestria_funcional: revisor
 estado: stub
-version: 0.6.1
+version: 0.6.2
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
+  - { v: 0.6.2, fecha: 2026-06-06, cambio: "acotada aplicabilidad: de target_tipo==repo genérico a bundler==turbopack OR Next.js>=15. Opciones evaluadas: A=independiente acotado (elegida) · B=fusión en XEK_nextjs · C=fusión en bundler genérico" }
 
 objetivo: >
   config bundler · cache · trace · módulos no soportados.
@@ -60,6 +61,7 @@ contrato_invocacion:
 aplicabilidad:
   cuando:
     - "manifest.target_tipo == 'repo'"
+    - "manifest.tooling.bundler == 'turbopack' || manifest.frameworks.nombre includes 'nextjs' (version_min >= 15)"
   prioridad: media
   coste_relativo: 2
 
@@ -77,6 +79,20 @@ triggers:
 # Objetivo
 
 config bundler · cache · trace · módulos no soportados.
+
+# Scope · aplicabilidad acotada
+
+Turbopack es el bundler por defecto de Next.js ≥ 15; ya no se configura como bundler
+independiente en la mayoría de proyectos. Para evitar solape con `XEK_nextjs` y `XEK_vite`,
+esta skill **solo aplica** cuando el manifiesto declara `tooling.bundler == 'turbopack'` o un
+framework Next.js ≥ 15. No es un check genérico de repo.
+
+Opciones evaluadas (síntesis del mantenedor, 2026-06-06):
+- **A · independiente acotado (elegida)** — mantener la skill, restringir `aplicabilidad.cuando`.
+  No destructiva; preserva el caso Turbopack standalone real.
+- **B · fusión en `XEK_nextjs`** — descartada: pierde granularidad y reutilización fuera de Next.
+- **C · fusión en bundler genérico con `XEK_vite`** — descartada: Turbopack no es Vite; el solape
+  es de propósito, no de implementación.
 
 # Estado
 

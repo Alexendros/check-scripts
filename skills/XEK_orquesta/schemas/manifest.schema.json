@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/Alexendros/xek-cluster/main/skills/XEK_orquesta/schemas/manifest.schema.json",
+  "$id": "https://raw.githubusercontent.com/Alexendros/check-scripts/main/skills/XEK_orquesta/schemas/manifest.schema.json",
   "title": "xek/manifest@v2",
   "description": "Manifiesto emitido por XEK_detecta-stack. Discrimina target_tipo y declara huellas de repo o host.",
   "type": "object",

@@ -3,10 +3,11 @@ slug: XEK_linux-contenedores
 ambito: Linux
 maestria_funcional: revisor
 estado: stub
-version: 0.6.1
+version: 0.6.2
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
+  - { v: 0.6.2, fecha: 2026-06-06, cambio: "formalizado Scope exclusivo frente a XEK_iac: contenedores audita runtime en host, iac audita artefactos declarativos en repo" }
 
 objetivo: >
   Docker/Podman/LXC · rootless · networks · imagen scan.
@@ -77,6 +78,18 @@ triggers:
 # Objetivo
 
 Docker/Podman/LXC · rootless · networks · imagen scan.
+
+# Scope exclusivo
+
+`XEK_linux-contenedores` audita el **runtime de contenedores instalado en un host**
+(`target_tipo == 'host'`): engines Docker/Podman/LXC, estado de los daemons, sockets, modo
+rootless, redes activas, capabilities y escaneo de imágenes ya presentes en la máquina.
+
+Los **artefactos declarativos versionados en un repositorio** (Dockerfile, `compose.yaml`,
+Terraform/IaC, en estático) son competencia exclusiva de
+[`XEK_iac`](../XEK_iac/SKILL.md) (`target_tipo == 'repo'`). La frontera Docker/Compose se
+resuelve por `target_tipo`: **host = runtime, repo = archivos**. No hay solape de checks entre
+ambas en una orquestación.
 
 # Estado
 

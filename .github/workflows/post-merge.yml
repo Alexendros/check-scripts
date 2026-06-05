@@ -1,8 +1,8 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# post-merge · xek-cluster · piloto
+# post-merge · check-scripts · piloto
 #
 # Apunta a be5a8dd (PR #20 plantillas) pinned. Infra/Docker.
-# enable_release=false (xek-cluster es infra, no se publica como artifact).
+# enable_release=false (check-scripts es infra, no se publica como artifact).
 # ═══════════════════════════════════════════════════════════════════════════════
 
 name: post-merge
