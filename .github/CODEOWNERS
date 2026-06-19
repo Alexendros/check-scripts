@@ -1,0 +1,12 @@
+# CODEOWNERS · xek-cluster
+# Documentación: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Propietario por defecto de todo el repositorio
+*                       @Alexendros
+
+# Documentos críticos
+/SECURITY.md            @Alexendros
+/LICENSE                @Alexendros
+/CODE_OF_CONDUCT.md     @Alexendros
+/.github/               @Alexendros
+/docs/adr/              @Alexendros
