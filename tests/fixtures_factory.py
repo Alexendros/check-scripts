@@ -68,6 +68,30 @@ def make_monorepo(path: Path) -> Path:
     return path
 
 
+def make_repo_limpio(path: Path) -> Path:
+    """Repo con todos los community standards · git-committed → 0 findings."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "README.md").write_text("# demo\n", encoding="utf-8")
+    (path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (path / "CONTRIBUTING.md").write_text("# contributing\n", encoding="utf-8")
+    (path / ".gitignore").write_text("node_modules/\n", encoding="utf-8")
+    (path / "CHANGELOG.md").write_text("# changelog\n", encoding="utf-8")
+    wf = path / ".github" / "workflows"
+    wf.mkdir(parents=True, exist_ok=True)
+    (wf / "ci.yml").write_text("on: push\n", encoding="utf-8")
+    git_init(path)
+    return path
+
+
+def make_repo_sucio(path: Path) -> Path:
+    """Repo sin LICENSE y con .env versionado → findings (incluye critical)."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "README.md").write_text("# demo\n", encoding="utf-8")
+    (path / ".env").write_text("SECRET=abc\n", encoding="utf-8")
+    git_init(path)
+    return path
+
+
 def make_bun_repo(path: Path) -> Path:
     """Repo con bun.lock de texto (default Bun >=1.2) · regresión P3."""
     path.mkdir(parents=True, exist_ok=True)

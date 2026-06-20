@@ -69,3 +69,16 @@ class RunnerContract:
         r = run_script(self.script_path, "--mode", "sandbox", *target)
         assert r.returncode in (0, 1), r.stderr
         self._validate_emitted(r.json, validate_manifest, validate_finding)
+
+    def test_real_gate_sin_sandbox_previo(self, run_script, target):
+        # XDG_RUNTIME_DIR virgen → no hay sandbox previo → gate exit 2.
+        r = run_script(self.script_path, "--mode", "real", *target)
+        assert r.returncode == 2, r.stderr
+        assert "gate" in r.stderr
+
+    def test_real_con_override_emite_valido(self, run_script, target,
+                                            validate_manifest, validate_finding):
+        r = run_script(self.script_path, "--mode", "real", *target,
+                       "--override-gate=AUTO_0")
+        assert r.returncode in (0, 1), r.stderr
+        self._validate_emitted(r.json, validate_manifest, validate_finding)
