@@ -3,11 +3,12 @@ slug: XEK_astro
 ambito: Framework
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter + modos + checks[] tipados + fuentes canónicas" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-astro.sh: emite xek/finding@v1 (6 checks astro-001..006 (astro.config, scripts, output server/hybrid+adapter, content config, type:module)) con compuerta de aplicabilidad (skipped:not_applicable), gate real, shellcheck-clean, testado (tests/test_astro.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar config estatica de un repo Astro (astro.config, version, scripts dev/build,
@@ -187,51 +188,19 @@ nunca modifica el target ni ejecuta el build.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-astro.sh`](scripts/xek-astro.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_astro.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Incluye **compuerta de aplicabilidad**:
+si el framework no se detecta en el repo emite `skipped:{razon:not_applicable}`
+y exit 0. El frontmatter `checks[]` es la especificación declarativa; el
+script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-SLUG="XEK_astro"; VERSION="0.7.0"
-MODE=""; TARGET="${XEK_TARGET:-}"
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*) MODE="${1#*=}"; shift ;;
-    --target) TARGET="$2"; shift 2 ;;
-    *)        echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash node jq grep find; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: astro-001..astro-006 (config, dep, scripts, output/adapter, content, esm)"
-  exit 0
-fi
-
-preflight || exit 2
-[[ -d "$TARGET" ]] || { echo "target inexistente" >&2; exit 2; }
-
-FINDINGS=0
-run() { local id="$1" sev="$2"; shift 2
-  if bash -c "$*" >/dev/null 2>&1; then echo "  - { check: $id, severity: $sev, status: pass }"
-  else echo "  - { check: $id, severity: $sev, status: fail }"; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run astro-001 high   "find '$TARGET' -maxdepth 1 -type f -name 'astro.config.*' | grep -q ."
-run astro-002 high   "jq -e '.dependencies.astro // .devDependencies.astro' '$TARGET/package.json'"
-run astro-003 medium "jq -e '.scripts.dev and .scripts.build' '$TARGET/package.json'"
-run astro-005 low    "! test -d '$TARGET/src/content' || find '$TARGET/src/content' -maxdepth 1 -name 'config.*' | grep -q ."
-
-if [[ "$MODE" == "sandbox" || "$MODE" == "real" ]]; then
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-astro.sh --mode {dry-run|sandbox|real} [--target /ruta/repo] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings / no aplica · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)

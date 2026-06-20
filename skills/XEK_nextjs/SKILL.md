@@ -3,11 +3,12 @@ slug: XEK_nextjs
 ambito: Framework
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter + modos + checks[] tipados + fuentes canónicas" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-nextjs.sh: emite xek/finding@v1 (6 checks nextjs-001..006 (next.config, scripts, router app/pages, next/image, output:export+middleware)) con compuerta de aplicabilidad (skipped:not_applicable), gate real, shellcheck-clean, testado (tests/test_nextjs.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar config estatica de un repo Next.js (next.config, version, scripts build/start,
@@ -189,51 +190,19 @@ inspecciona ficheros del repo; nunca modifica el target ni ejecuta el build.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-nextjs.sh`](scripts/xek-nextjs.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_nextjs.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Incluye **compuerta de aplicabilidad**:
+si el framework no se detecta en el repo emite `skipped:{razon:not_applicable}`
+y exit 0. El frontmatter `checks[]` es la especificación declarativa; el
+script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-SLUG="XEK_nextjs"; VERSION="0.7.0"
-MODE=""; TARGET="${XEK_TARGET:-}"
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*) MODE="${1#*=}"; shift ;;
-    --target) TARGET="$2"; shift 2 ;;
-    *)        echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash node jq grep find; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: nextjs-001..nextjs-006 (config, dep, scripts, router, next/image, output/middleware)"
-  exit 0
-fi
-
-preflight || exit 2
-[[ -d "$TARGET" ]] || { echo "target inexistente" >&2; exit 2; }
-
-FINDINGS=0
-run() { local id="$1" sev="$2"; shift 2
-  if bash -c "$*" >/dev/null 2>&1; then echo "  - { check: $id, severity: $sev, status: pass }"
-  else echo "  - { check: $id, severity: $sev, status: fail }"; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run nextjs-001 high   "find '$TARGET' -maxdepth 1 -type f -name 'next.config.*' | grep -q ."
-run nextjs-002 high   "jq -e '.dependencies.next // .devDependencies.next' '$TARGET/package.json'"
-run nextjs-003 medium "jq -e '.scripts.build and .scripts.start' '$TARGET/package.json'"
-run nextjs-004 high   "test -d '$TARGET/app' || test -d '$TARGET/src/app' || test -d '$TARGET/pages' || test -d '$TARGET/src/pages'"
-
-if [[ "$MODE" == "sandbox" || "$MODE" == "real" ]]; then
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-nextjs.sh --mode {dry-run|sandbox|real} [--target /ruta/repo] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings / no aplica · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)
