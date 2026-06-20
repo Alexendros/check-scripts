@@ -3,11 +3,12 @@ slug: XEK_datos-criticos
 ambito: DatosCriticos
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: detección read-only de secretos/PII (patrones de claves, .env no commiteado, credenciales hardcoded) · checks[] tipados · fuentes canónicas reales" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-datos-criticos.sh: emite xek/finding@v1 (6 checks datos-001..006 (.env versionado, .gitignore, claves PEM, tokens cloud, credenciales hardcoded, PII en fixtures)), gate real, shellcheck-clean, testado (tests/test_datos_criticos.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Detectar y reportar datos críticos expuestos en un repo (patrones de api keys
@@ -179,37 +180,18 @@ modifica el repo.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-datos-criticos.sh`](scripts/xek-datos-criticos.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_datos_criticos.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Opera read-only sobre el repo target
+(`--target`, default cwd). El frontmatter `checks[]` es la especificación
+declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_datos-criticos"
-VERSION="0.7.0"
-MODE=""
-XEK_TARGET="${XEK_TARGET:-}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*)  MODE="${1#*=}"; shift ;;
-    --target)  XEK_TARGET="$2"; shift 2 ;;
-    *)         echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-[[ "$MODE" =~ ^(dry-run|sandbox|real)$ ]] || { echo "bad --mode" >&2; exit 2; }
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  echo "checks: datos-001..datos-006 (.env, claves PEM, tokens cloud, credenciales, PII)"
-  echo "nota: hallazgos se reportan como ruta:linea + tipo, nunca el valor"
-  echo "target: ${XEK_TARGET:-<sin --target>}"
-  exit 0
-fi
-
-[[ -d "$XEK_TARGET" ]] || { echo "target inexistente: $XEK_TARGET" >&2; exit 2; }
-export XEK_TARGET
-# sandbox/real: ejecutar los checks[] del frontmatter sobre $XEK_TARGET; redactar valores.
+xek-datos-criticos.sh --mode {dry-run|sandbox|real} [--target /ruta/repo] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python
