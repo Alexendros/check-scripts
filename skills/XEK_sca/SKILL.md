@@ -2,66 +2,139 @@
 slug: XEK_sca
 ambito: SCA
 maestria_funcional: revisor
-estado: stub
-version: 0.6.1
+estado: borrador
+version: 0.7.0
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
+  - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: SCA read-only (lockfile, advisories osv-scanner, versiones pinneadas, SBOM CycloneDX) · checks[] tipados · fuentes canónicas reales" }
 
 objetivo: >
-  inventario de dependencias vulnerables (pnpm audit · osv-scanner).
+  Verificar la composición de software de un repo (lockfile, advisories osv,
+  versiones pinneadas, SBOM CycloneDX) en modo read-only sin modificar
+  dependencias.
 
-fuentes_externas: []          # TODO: declarar tools concretas con version_min + licencia SPDX
-conexiones_requeridas: []
+precondiciones_runtime:
+  binarios:
+    - { nombre: "bash",        version_min: "5.0",  licencia: "GPL-3.0",   check_cmd: "bash --version" }
+    - { nombre: "find",        version_min: "4.7",  licencia: "GPL-3.0",   check_cmd: "find --version" }
+    - { nombre: "grep",        version_min: "3.0",  licencia: "GPL-3.0",   check_cmd: "grep --version" }
+    - { nombre: "jq",          version_min: "1.7",  licencia: "MIT",       check_cmd: "jq --version" }
+    - { nombre: "osv-scanner", version_min: "1.7",  licencia: "Apache-2.0", check_cmd: "osv-scanner --version" }
+  capabilities:
+    - { cap: "CAP_NONE", razon: "lectura recursiva del repo target · sin escalada" }
+  paths_lectura:
+    - "$XEK_TARGET/**/*.lock"
+    - "$XEK_TARGET/**/package.json"
+  paths_escritura:
+    - "$XDG_RUNTIME_DIR/xek-sandbox/XEK_sca/"
+  conexiones:
+    - { destino: "api.osv.dev", proto: https, auth: none }
 
-referencias_canonicas:        # TODO: ≥1 doc_oficial + ≥1 estandar (R4)
-  - { tipo: doc_oficial, url: "TODO", cobertura: "TODO" }
-  - { tipo: estandar,    url: "TODO", cobertura: "TODO" }
+escalada:
+  adapter: "${XEK_SUDO:-sudo -A}"
+  capabilities_requeridas: []
+  fallback_sin_escalada: "no aplica · skill sin escalada"
+  registrar_en_finding: false
+
+fuentes_externas:
+  - { tipo: tool, nombre: osv-scanner, version_min: "1.7", licencia: "Apache-2.0" }
+  - { tipo: tool, nombre: jq,          version_min: "1.7", licencia: "MIT" }
+  - { tipo: tool, nombre: grep,        version_min: "3.0", licencia: "GPL-3.0" }
+conexiones_requeridas:
+  - { destino: "api.osv.dev", proto: https, auth: none }
+
+referencias_canonicas:
+  - { tipo: doc_oficial, url: "https://owasp.org/www-project-dependency-check/", cobertura: "OWASP Dependency-Check · metodología de detección de dependencias vulnerables" }
+  - { tipo: estandar,    url: "https://osv.dev", cobertura: "OSV · esquema y base de datos de advisories de vulnerabilidades" }
+  - { tipo: estandar,    url: "https://cyclonedx.org", cobertura: "CycloneDX · estándar de formato SBOM" }
+verificar_referencias:
+  cuando: "antes de cada bump de version_min de osv-scanner"
+  como: "consultar changelog upstream; rechazar bump si hay cambio breaking en el formato de salida"
 
 areas_criticas:
-  permisos_user:  []
-  fhs_tocados:    []
-  visual_secrets: []
-  zonas_ocultas:  []
+  permisos_user:
+    - "lectura recursiva del repo target"
+    - "escritura: $XDG_RUNTIME_DIR/xek-sandbox/XEK_sca/"
+  fhs_tocados:
+    - "$XEK_TARGET/ (solo lectura de lockfiles y manifiestos)"
+  visual_secrets:
+    - "tokens de registries privados en lockfiles · redactar con [REDACTED]"
+  zonas_ocultas:
+    - "node_modules/, .venv/, vendor/ · evaluar lockfile, no escanear árbol instalado"
 
 modos_ejecucion:
   dry-run:
-    proposito: "TODO"
+    proposito: "Verificar precondiciones y listar los checks y manifiestos detectados sin consultar advisories."
     efectos_disco: "ninguno"
     efectos_red: "ninguno"
-    salida: "stdout · plan textual"
+    salida: "stdout · plan textual de checks · exit 0 si parse OK"
   sandbox:
-    proposito: "TODO"
-    aislamiento: "bwrap | tmpfs | worktree"
+    proposito: "Correr los checks sobre un clon en sandbox y consultar advisories OSV read-only."
+    aislamiento: "git worktree en $XDG_RUNTIME_DIR/xek-sandbox/XEK_sca/<run-id>/"
     efectos_disco: "solo bajo $XDG_RUNTIME_DIR/xek-sandbox/XEK_sca/"
-    efectos_red: "TODO"
-    salida: "findings.json en sandbox"
+    efectos_red: "GET read-only a api.osv.dev para advisories"
+    salida: "findings.json en sandbox path · exit 0|1 según findings"
   real:
-    proposito: "TODO"
+    proposito: "Ejecutar contra el repo real (read-only) y persistir informe en cuaderno."
     precondicion: "sandbox del mismo input ha pasado en las últimas 24h"
     efectos_disco: "cuaderno/artefactos/XEK_sca/<fecha>/"
-    efectos_red: "TODO"
-    salida: "informe.md + findings.json + propuesta_#N"
+    efectos_red: "GET read-only a api.osv.dev"
+    salida: "informe.md + findings.json + propuesta_#N si findings ≥ severidad_min"
 gate_promocion:
   regla: "modo N+1 solo si modo N exit 0|1 con plan"
   override: "--override-gate=AUTO_<timestamp ±60s>"
 
-escalada_privilegio:
-  comando_template: "${XEK_SUDO:-sudo -A}"
-  cuando_aplica: "TODO"
-
 depende_de:
-  - { slug: XEK_detecta-stack, modo: sandbox, obligatoria: true, razon: "necesita manifiesto" }
+  - { slug: XEK_detecta-stack, modo: sandbox, obligatoria: true, razon: "necesita manifiesto del repo (gestor, lockfiles)" }
 contrato_invocacion:
   modo_subordinado: sandbox
   promocion_real: solo_operador
-  consolidacion: "json · schema xek/finding@v1"
+  consolidacion: "json · merge por slug · schema xek/finding@v1"
+
+checks:
+  - id: "sca-001"
+    descripcion: "Existe al menos un lockfile reconocido en el repo (npm/pnpm/yarn/cargo/poetry)"
+    command_template: "find \"$XEK_TARGET\" -maxdepth 3 -type f \\( -name 'package-lock.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'Cargo.lock' -o -name 'poetry.lock' \\) | grep -q ."
+    expected_exit: 0
+    severity_default: high
+    solo_modo: [sandbox, real]
+  - id: "sca-002"
+    descripcion: "osv-scanner no reporta vulnerabilidades sobre los lockfiles del repo"
+    command_template: "osv-scanner --format json --recursive \"$XEK_TARGET\" | jq -e '[.results[].packages[].vulnerabilities[]?] | length == 0'"
+    expected_exit: 0
+    severity_default: high
+    solo_modo: [sandbox, real]
+  - id: "sca-003"
+    descripcion: "Sin advisories de severidad CRITICAL en el resultado de osv-scanner"
+    command_template: "osv-scanner --format json --recursive \"$XEK_TARGET\" | jq -e '[.results[].packages[].vulnerabilities[]?.database_specific.severity? // empty | ascii_upcase | select(. == \"CRITICAL\")] | length == 0'"
+    expected_exit: 0
+    severity_default: high
+    solo_modo: [sandbox, real]
+  - id: "sca-004"
+    descripcion: "package.json sin rangos abiertos peligrosos (sin dependencia en '*' o 'latest')"
+    command_template: "! find \"$XEK_TARGET\" -maxdepth 2 -name package.json -exec grep -lE '\"[^\"]+\"[[:space:]]*:[[:space:]]*\"(\\*|latest)\"' {} + | grep -q ."
+    expected_exit: 0
+    severity_default: medium
+    solo_modo: [sandbox, real]
+  - id: "sca-005"
+    descripcion: "Presencia de un SBOM CycloneDX en la raiz del repo (bom.json o *.cdx.json)"
+    command_template: "find \"$XEK_TARGET\" -maxdepth 2 -type f \\( -name 'bom.json' -o -name '*.cdx.json' -o -name 'cyclonedx.json' \\) | grep -q ."
+    expected_exit: 0
+    severity_default: low
+    solo_modo: [sandbox, real]
+  - id: "sca-006"
+    descripcion: "El SBOM CycloneDX, si existe, declara bomFormat CycloneDX y es JSON valido"
+    command_template: "! find \"$XEK_TARGET\" -maxdepth 2 -name 'bom.json' | grep -q . || jq -e '.bomFormat == \"CycloneDX\"' \"$XEK_TARGET/bom.json\""
+    expected_exit: 0
+    severity_default: low
+    solo_modo: [sandbox, real]
 
 aplicabilidad:
   cuando:
     - "manifest.target_tipo == 'repo'"
-  prioridad: media
-  coste_relativo: 2
+  prioridad: alta
+  coste_relativo: 3
 
 migracion_runtime:
   bash:   scripts/xek-sca.sh
@@ -69,29 +142,118 @@ migracion_runtime:
   zsh:    scripts/xek-sca.zsh
 
 triggers:
-  keywords: ["TODO1", "TODO2", "TODO3"]
-  contextos: ["pre-PR"]
-  cron: ""
+  keywords: ["sca", "osv-scanner", "dependency-vulnerabilities", "lockfile", "sbom", "cyclonedx", "supply-chain"]
+  contextos: ["pre-PR", "post-merge", "pre-deploy"]
+  cron: "0 6 * * 1"
 ---
 
 # Objetivo
 
-inventario de dependencias vulnerables (pnpm audit · osv-scanner).
+Verificar la composicion de software (SCA) de un repositorio en modo read-only:
+presencia de un lockfile reconocido, advisories de vulnerabilidad consultados con
+`osv-scanner` contra la base de datos OSV, ausencia de rangos de version abiertos
+peligrosos en `package.json` y presencia y validez de un SBOM CycloneDX. La skill
+solo lee lockfiles y manifiestos; nunca instala, actualiza ni modifica
+dependencias.
 
-# Estado
+# Cuando activar
 
-**Stub bootstrap v0.0.1** — frontmatter declarativo presente, implementación pendiente. Se completa en Ronda 3 del ciclo dialéctico tras validación de la antítesis sobre la tesis v0.5.
+| Si... | Entonces... |
+|---|---|
+| `manifest.target_tipo == 'repo'` con lockfile | Ejecutar `--mode=sandbox` y consultar advisories OSV |
+| Apertura de PR que toca dependencias | Correr `sca-001..sca-006` y bloquear si severidad high falla |
+| Auditoria periodica de supply-chain | Promover a `--mode=real` tras sandbox verde |
 
-# Pendiente para implementación
+# Uso · comentario encabezado (copiar al script)
 
-- [ ] Rellenar `fuentes_externas` con tools concretas + version_min + licencia SPDX
-- [ ] Rellenar `referencias_canonicas` con ≥1 doc_oficial + ≥1 estandar (R4)
-- [ ] Rellenar `triggers.keywords` (≥3 · R7)
-- [ ] Implementar `scripts/xek-sca.sh` con los 3 modos
-- [ ] Implementar adaptadores Python y zsh
-- [ ] Añadir caso happy + caso falla en sección Verificación
-- [ ] Bitácora evolución con entrada por bump
+```bash
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  XEK_sca · v0.7.0 · 2026-06-20                                ║
+# ║  Funcion: SCA read-only (lockfile, OSV advisories, SBOM)     ║
+# ║  Variables entorno:                                          ║
+# ║    XEK_TARGET         path absoluto al repo                  ║
+# ║    XDG_RUNTIME_DIR    base sandbox                           ║
+# ║  Uso:                                                        ║
+# ║    xek-sca.sh --mode={dry-run|sandbox|real} --target <PATH> ║
+# ║  Exit codes:                                                 ║
+# ║    0=clean · 1=findings · 2=config · 3=missing-mode · 4=ill-call║
+# ╚══════════════════════════════════════════════════════════════╝
+```
 
-# Bitácora evolución
+# Implementacion referencia (bash · fuente de verdad)
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+SLUG="XEK_sca"
+VERSION="0.7.0"
+MODE=""
+XEK_TARGET="${XEK_TARGET:-}"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode=*)  MODE="${1#*=}"; shift ;;
+    --target)  XEK_TARGET="$2"; shift 2 ;;
+    *)         echo "ill-call: $1" >&2; exit 4 ;;
+  esac
+done
+
+[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
+[[ "$MODE" =~ ^(dry-run|sandbox|real)$ ]] || { echo "bad --mode" >&2; exit 2; }
+
+if [[ "$MODE" == "dry-run" ]]; then
+  echo "## ${SLUG} v${VERSION} · plan dry-run"
+  echo "checks: sca-001..sca-006 (lockfile, OSV advisories, versiones, SBOM CycloneDX)"
+  echo "target: ${XEK_TARGET:-<sin --target>}"
+  exit 0
+fi
+
+[[ -d "$XEK_TARGET" ]] || { echo "target inexistente: $XEK_TARGET" >&2; exit 2; }
+export XEK_TARGET
+# sandbox/real: ejecutar los checks[] del frontmatter sobre $XEK_TARGET.
+```
+
+# Adaptador Python
+
+```python
+#!/usr/bin/env python3
+"""XEK_sca · adapter Python para pipelines orquestados."""
+import subprocess, sys, pathlib
+script = pathlib.Path(__file__).with_name("xek-sca.sh")
+sys.exit(subprocess.call(["bash", str(script), *sys.argv[1:]]))
+```
+
+# Adaptador zsh
+
+```zsh
+#!/usr/bin/env zsh
+emulate -L zsh
+exec bash "${0:A:h}/xek-sca.sh" "$@"
+```
+
+# Verificacion end-to-end
+
+```bash
+# Caso happy
+./scripts/xek-sca.sh --mode=dry-run && echo "PASS dry-run"
+
+# Caso findings esperado (repo con dependencia vulnerable conocida)
+./scripts/xek-sca.sh --mode=sandbox --target /tmp/repo-con-cve
+echo "exit=$?"  # 1 si osv-scanner reporta advisories
+```
+
+# Riesgos y mitigacion
+
+| Riesgo | Mitigacion |
+|---|---|
+| api.osv.dev no disponible | `sca-002`/`sca-003` reportan config error exit 2, no falso clean |
+| Lockfile de gestor no soportado | `sca-001` documenta el gestor en el finding |
+| Token de registry privado en lockfile | Redaccion `[REDACTED]` antes de persistir |
+| SBOM ausente en repos pequenos | `sca-005` severidad low · informativo |
+
+# Bitacora evolucion
 
 - **v0.0.1** (2026-05-20) — bootstrap stub.
+- **v0.6.1** (2026-05-22) — degradado borrador→stub (commit deuda v0.6).
+- **v0.7.0** (2026-06-20) — stub→borrador: checks[] read-only lockfile/OSV/SBOM · fuentes canonicas OWASP Dependency-Check + OSV + CycloneDX.
