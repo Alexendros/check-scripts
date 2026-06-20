@@ -19,6 +19,10 @@ y este proyecto se adhiere a [SemVer 2.0.0](https://semver.org/lang/es/).
   `XEK_linux-energia`, `XEK_linux-escritorio`, `XEK_linux-peripherals` (con sus
   tests de contrato). `XEK_linux-peripherals` refina sus `checks[]` 001-005 a
   predicados pass/fail. Cobertura ejecutable del catálogo: 9 skills.
+- Runners ejecutables (oleada 3, repo · seguridad/compliance): `XEK_sca`,
+  `XEK_integridad`, `XEK_compliance-licencias`, `XEK_datos-criticos` (con sus
+  tests de contrato). `XEK_sca` degrada a informativo si `osv-scanner` no está
+  disponible. Cobertura ejecutable del catálogo: 13 skills.
 - `xek/manifest@v2`: campo `host_huellas.distro_id` y gestores `poetry`,
   `bundler`, `composer`, `deno` en `repo.gestor_paquetes`.
 

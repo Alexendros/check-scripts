@@ -3,11 +3,12 @@ slug: XEK_compliance-licencias
 ambito: Compliance
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter R4+R7 + modos + checks[] tipados (lic-001..006) + fuentes canónicas reales (SPDX, REUSE)" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-compliance-licencias.sh: emite xek/finding@v1 (6 checks lic-001..006 (LICENSE, SPDX, license en package.json, NonCommercial, copyleft+NOTICE, REUSE)), gate real, shellcheck-clean, testado (tests/test_compliance_licencias.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar licenciamiento de un repo en modo read-only: presencia de LICENSE,
@@ -175,64 +176,18 @@ ficheros estaticos; nunca modifica el repo ni descarga metadatos remotos.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-compliance-licencias.sh`](scripts/xek-compliance-licencias.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_compliance_licencias.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Opera read-only sobre el repo target
+(`--target`, default cwd). El frontmatter `checks[]` es la especificación
+declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_compliance-licencias"
-VERSION="0.7.0"
-MODE=""
-TARGET_DIR="${XEK_TARGET_DIR:-.}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*)   MODE="${1#*=}"; shift ;;
-    --target)   TARGET_DIR="$2"; shift 2 ;;
-    *)          echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash grep find jq; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin absent" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: lic-001..lic-006 (LICENSE, SPDX, metadata, NonCommercial, copyleft, REUSE)"
-  exit 0
-fi
-
-preflight || exit 2
-[[ -d "$TARGET_DIR" ]] || { echo "target dir not found: $TARGET_DIR" >&2; exit 2; }
-
-FINDINGS=0
-emit() { echo "  - { check: $1, severity: $2, status: $3 }"; }
-run_check() {
-  local id="$1" sev="$2"; shift 2
-  if "$@" >/dev/null 2>&1; then emit "$id" "$sev" pass
-  else emit "$id" "$sev" fail; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run_check lic-001 high   bash -c "find '$TARGET_DIR' -maxdepth 1 -iregex '.*/\(license\|licence\|copying\)\([.][a-z]\+\)\?' -print -quit | grep -q ."
-run_check lic-002 medium bash -c "grep -rqI 'SPDX-License-Identifier:' '$TARGET_DIR'"
-run_check lic-004 high   bash -c "! grep -rqiI 'noncommercial\|CC-BY-NC' '$TARGET_DIR'/LICENSE* 2>/dev/null"
-
-if [[ "$MODE" == "sandbox" ]]; then
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
-
-if [[ "$MODE" == "real" ]]; then
-  OUT="${XEK_CUADERNO:-$HOME/.claude/cuadernos/xek-cluster}/artefactos/${SLUG}/$(date +%Y-%m-%d)"
-  mkdir -p "$OUT"
-  echo "informe: $OUT"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-compliance-licencias.sh --mode {dry-run|sandbox|real} [--target /ruta/repo] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)

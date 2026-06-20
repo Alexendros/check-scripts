@@ -3,11 +3,12 @@ slug: XEK_integridad
 ambito: Integridad
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: integridad cadena de suministro read-only (SRI, hashes lockfile, provenance SLSA, firmas sigstore) · checks[] tipados · fuentes canónicas reales" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-integridad.sh: emite xek/finding@v1 (6 checks integridad-001..006 (SRI, hashes de lockfile npm/pnpm, provenance SLSA, firma sigstore/cosign, pinning de actions a SHA)), gate real, shellcheck-clean, testado (tests/test_integridad.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar la integridad de la cadena de suministro de un repo (SRI, hashes de
@@ -183,36 +184,18 @@ configuracion; nunca firma, modifica ni regenera artefactos.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-integridad.sh`](scripts/xek-integridad.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_integridad.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Opera read-only sobre el repo target
+(`--target`, default cwd). El frontmatter `checks[]` es la especificación
+declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_integridad"
-VERSION="0.7.0"
-MODE=""
-XEK_TARGET="${XEK_TARGET:-}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*)  MODE="${1#*=}"; shift ;;
-    --target)  XEK_TARGET="$2"; shift 2 ;;
-    *)         echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-[[ "$MODE" =~ ^(dry-run|sandbox|real)$ ]] || { echo "bad --mode" >&2; exit 2; }
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  echo "checks: integridad-001..integridad-006 (SRI, hashes lockfile, provenance SLSA, firma, pin SHA)"
-  echo "target: ${XEK_TARGET:-<sin --target>}"
-  exit 0
-fi
-
-[[ -d "$XEK_TARGET" ]] || { echo "target inexistente: $XEK_TARGET" >&2; exit 2; }
-export XEK_TARGET
-# sandbox/real: ejecutar los checks[] del frontmatter sobre $XEK_TARGET.
+xek-integridad.sh --mode {dry-run|sandbox|real} [--target /ruta/repo] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python
