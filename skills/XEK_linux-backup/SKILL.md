@@ -3,11 +3,12 @@ slug: XEK_linux-backup
 ambito: Linux
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador · fuentes reales, escalada R16, checks[] read-only" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-linux-backup.sh: emite xek/finding@v1 (6 checks bkp-001..006 (herramienta, timer/cron, retención, snapshot, restore-test, offsite 3-2-1)), gate real, shellcheck-clean, testado (tests/test_linux_backup.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar postura de copias de seguridad del host: herramienta presente, timer
@@ -163,12 +164,18 @@ host y sobre el repositorio de backup.
 
 # Implementación referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-linux-backup.sh`](scripts/xek-linux-backup.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_linux_backup.py`). Emite `xek/finding@v1`: un finding por cada check que falla,
+con `severity` y `remediation`. Los checks privilegiados degradan a
+informativo sin escalada (no abortan). El frontmatter `checks[]` es la
+especificación declarativa; el script no se duplica aquí para evitar drift.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-# Escalada agnóstica del operador (R16)
-SUDO="${XEK_SUDO:-sudo -A}"
-# TODO: ejecutar los checks[] declarados en los 3 modos · read-only sobre host y repo.
+xek-linux-backup.sh --mode {dry-run|sandbox|real} [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python

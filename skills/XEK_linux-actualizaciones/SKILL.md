@@ -3,11 +3,12 @@ slug: XEK_linux-actualizaciones
 ambito: Linux
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador · fuentes reales, escalada R16, checks[] read-only" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-linux-actualizaciones.sh: emite xek/finding@v1 (6 checks act-001..006 (parches seguridad, unattended-upgrades, reboot-required, keyrings, auth privilegiado en real)), gate real, shellcheck-clean, testado (tests/test_linux_actualizaciones.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar postura de actualizaciones del host: parches de seguridad pendientes,
@@ -163,12 +164,18 @@ actualización (read-only sobre el host).
 
 # Implementación referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-linux-actualizaciones.sh`](scripts/xek-linux-actualizaciones.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_linux_actualizaciones.py`). Emite `xek/finding@v1`: un finding por cada check que falla,
+con `severity` y `remediation`. Los checks privilegiados degradan a
+informativo sin escalada (no abortan). El frontmatter `checks[]` es la
+especificación declarativa; el script no se duplica aquí para evitar drift.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-# Escalada agnóstica del operador (R16)
-SUDO="${XEK_SUDO:-sudo -A}"
-# TODO: ejecutar los checks[] declarados en los 3 modos · read-only sobre el host.
+xek-linux-actualizaciones.sh --mode {dry-run|sandbox|real} [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python

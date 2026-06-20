@@ -3,11 +3,12 @@ slug: XEK_repo-higiene
 ambito: Repo
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter R4+R7 + modos + checks[] tipados read-only + fuentes canónicas reales (GitHub community standards + Conventional Commits + Keep a Changelog)" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-repo-higiene.sh: emite xek/finding@v1 (8 checks repo-001..008 read-only), gate real, shellcheck-clean, testado (tests/test_repo_higiene.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar higiene de repo: README, LICENSE, CONTRIBUTING, .gitignore,
@@ -175,71 +176,19 @@ indice git; nunca modifica el repo.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementacion ejecutable y **unica fuente de verdad** es
+[`scripts/xek-repo-higiene.sh`](scripts/xek-repo-higiene.sh) (v0.7.1,
+shellcheck-clean, cubierto por `tests/test_repo_higiene.py`). Emite
+`xek/finding@v1`: un finding por cada check que falla, con `severity` y
+`remediation`. El frontmatter `checks[]` es la especificacion declarativa; el
+script no se duplica aqui para evitar drift.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_repo-higiene"
-VERSION="0.7.0"
-MODE=""
-REPO="${XEK_TARGET_DIR:-.}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*)  MODE="${1#*=}"; shift ;;
-    --target)  REPO="$2"; shift 2 ;;
-    *)         echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash git grep find test; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin absent" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: repo-001..repo-008 (readme, license, contributing, gitignore, changelog, ci, sin .env, sin binarios grandes)"
-  exit 0
-fi
-
-preflight || exit 2
-git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "not a git repo: $REPO" >&2; exit 2; }
-
-FINDINGS=0
-emit() { echo "  - { check: $1, severity: $2, status: $3 }"; }
-run_check() {
-  local id="$1" sev="$2"; shift 2
-  if "$@" >/dev/null 2>&1; then emit "$id" "$sev" pass
-  else emit "$id" "$sev" fail; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run_check repo-001 high     bash -c "find '$REPO' -maxdepth 1 -iregex '.*/readme\\(\\.md\\|\\.rst\\|\\.txt\\)?' | grep -q ."
-run_check repo-002 high     bash -c "find '$REPO' -maxdepth 1 -iregex '.*/licen[sc]e\\(\\.md\\|\\.txt\\)?' | grep -q ."
-run_check repo-003 medium   bash -c "find '$REPO' '$REPO/.github' -maxdepth 1 -iname 'contributing*' 2>/dev/null | grep -q ."
-run_check repo-004 medium   bash -c "test -f '$REPO/.gitignore'"
-run_check repo-005 low      bash -c "find '$REPO' -maxdepth 1 -iname 'changelog*' | grep -q ."
-run_check repo-006 medium   bash -c "find '$REPO/.github/workflows' -maxdepth 1 -iregex '.*\\.ya?ml' 2>/dev/null | grep -q ."
-run_check repo-007 critical bash -c "! git -C '$REPO' ls-files --error-unmatch -- '*.env' '.env' '.env.*' '*.pem' '*id_rsa*' 2>/dev/null | grep -q ."
-
-if [[ "$MODE" == "sandbox" ]]; then
-  SANDBOX="${XDG_RUNTIME_DIR:-/tmp}/xek-sandbox/${SLUG}/$(date +%s)-$$"
-  mkdir -p "$SANDBOX"
-  echo "sandbox: $SANDBOX"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
-
-if [[ "$MODE" == "real" ]]; then
-  OUT="${XEK_CUADERNO:-$HOME/.claude/cuadernos/xek-cluster}/artefactos/${SLUG}/$(date +%Y-%m-%d)"
-  mkdir -p "$OUT"
-  echo "informe: $OUT"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-repo-higiene.sh --mode {dry-run|sandbox|real} [--target <repo>] \
+  [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config (no git repo) · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)
