@@ -3,10 +3,11 @@ slug: XEK_linux-peripherals
 ambito: Linux
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.6.0, fecha: 2026-05-21, cambio: "fusión XEK_linux-audio + XEK_linux-bluetooth en una skill que recorre bus D-Bus único" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador · fuentes reales (udev/input kernel docs), escalada R16 explícita, checks[] read-only firmware/input/USB" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-linux-peripherals.sh: emite xek/finding@v1 (8 checks peripherals-001..008 (audio, grupos, pairings, bluetoothctl, pipewire, input, usb, firmware privilegiado en real); checks 001-005 refinados a predicados), gate real, shellcheck-clean, testado (tests/test_linux_peripherals.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar postura de periféricos del host (audio PipeWire/PulseAudio/ALSA + Bluetooth BlueZ) mediante recorrido D-Bus unificado.
@@ -51,31 +52,31 @@ verificar_referencias:
 checks:
   - id: "peripherals-001"
     descripcion: "Listar servidor audio activo (PipeWire | PulseAudio | ALSA-only)"
-    command_template: "pw-cli info 0 2>/dev/null | head -5 || pactl info 2>/dev/null | head -5 || aplay -L 2>/dev/null | head -3 || echo none"
+    command_template: "pw-cli info 0 >/dev/null 2>&1 || pactl info >/dev/null 2>&1 || aplay -l >/dev/null 2>&1"
     expected_exit: 0
     severity_default: info
     solo_modo: [dry-run, sandbox, real]
   - id: "peripherals-002"
     descripcion: "Verificar usuario en grupos audio + bluetooth"
-    command_template: "groups | grep -Eo 'audio|bluetooth' | sort -u"
+    command_template: "groups 2>/dev/null | grep -qE '\\b(audio|bluetooth)\\b'"
     expected_exit: 0
     severity_default: info
     solo_modo: [dry-run, sandbox, real]
   - id: "peripherals-003"
     descripcion: "Bluetooth pairings persistentes que aún no se han usado en 90 días"
-    command_template: "find /var/lib/bluetooth -name info -mtime +90 2>/dev/null | wc -l"
+    command_template: "test \"$(find /var/lib/bluetooth -name info -mtime +90 2>/dev/null | wc -l)\" -eq 0"
     expected_exit: 0
     severity_default: low
     solo_modo: [sandbox, real]
   - id: "peripherals-004"
     descripcion: "Adaptadores Bluetooth con firmware desactualizado conocido"
-    command_template: "bluetoothctl --version && bluetoothctl list 2>/dev/null"
+    command_template: "command -v bluetoothctl >/dev/null 2>&1"
     expected_exit: 0
     severity_default: medium
     solo_modo: [sandbox, real]
   - id: "peripherals-005"
     descripcion: "PipeWire sample rate fijo vs adaptativo"
-    command_template: "pw-cli enum-params 0 Props 2>/dev/null | grep -E 'rate|quantum' | head -5"
+    command_template: "pw-cli enum-params 0 Props 2>/dev/null | grep -qE 'rate|quantum'"
     expected_exit: 0
     severity_default: info
     solo_modo: [sandbox, real]
@@ -182,12 +183,18 @@ argumento de antítesis · ronda 001).
 
 # Implementación referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-linux-peripherals.sh`](scripts/xek-linux-peripherals.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_linux_peripherals.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla, con `severity` y `remediation`. Los checks privilegiados
+(`solo_modo:[real]`) degradan a informativo sin escalada. El frontmatter
+`checks[]` es la especificación declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-# Escalada agnóstica del operador (R16)
-SUDO="${XEK_SUDO:-sudo -A}"
-# TODO: ejecutar los checks[] declarados en los 3 modos · read-only sobre D-Bus, sysfs e input.
+xek-linux-peripherals.sh --mode {dry-run|sandbox|real} [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python
