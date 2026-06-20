@@ -8,6 +8,7 @@ mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "bump de estado stub a borrador per degradacion masiva ronda-002" }
   - { v: 0.7.0, fecha: 2026-05-22, cambio: "SKILL.md completo: frontmatter R4+R7+R14 + precondiciones_runtime + checks[] tipado + bash ejecutable · estado borrador (beta gateado a linter ejecutable)" }
+  - { v: 0.7.1, fecha: 2026-06-20, cambio: "runner real scripts/xek-detecta-stack.sh: emite xek/manifest@v2 validado contra schema (jsonschema PASS en repo/host/app-en-vivo), shellcheck-clean, escalada fallback→skipped · estado sigue borrador (linter no gatea beta a runner)" }
 
 objetivo: >
   Detectar el tipo de target (repo|app-en-vivo|host) e inspeccionar sus huellas
