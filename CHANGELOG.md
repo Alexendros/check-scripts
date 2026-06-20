@@ -15,6 +15,10 @@ y este proyecto se adhiere a [SemVer 2.0.0](https://semver.org/lang/es/).
 - Runners ejecutables (oleada 1) que emiten `xek/finding@v1`: `XEK_repo-higiene`
   (repo) y `XEK_linux-fs` / `XEK_linux-actualizaciones` / `XEK_linux-backup`
   (host). Plantilla canónica `skills/_template/scripts/xek-skill-template.sh`.
+- Runners ejecutables (oleada 2, host): `XEK_linux-contenedores`,
+  `XEK_linux-energia`, `XEK_linux-escritorio`, `XEK_linux-peripherals` (con sus
+  tests de contrato). `XEK_linux-peripherals` refina sus `checks[]` 001-005 a
+  predicados pass/fail. Cobertura ejecutable del catálogo: 9 skills.
 - `xek/manifest@v2`: campo `host_huellas.distro_id` y gestores `poetry`,
   `bundler`, `composer`, `deno` en `repo.gestor_paquetes`.
 
