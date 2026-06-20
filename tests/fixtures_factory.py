@@ -92,6 +92,47 @@ def make_repo_sucio(path: Path) -> Path:
     return path
 
 
+def make_vite_repo(path: Path) -> Path:
+    """Repo Vite mínimo aplicable (sin vite.config/type:module → varios findings)."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "package.json").write_text(json.dumps({
+        "name": "demo-vite",
+        "devDependencies": {"vite": "^5.0.0"},
+        "scripts": {"build": "vite build"},
+    }), encoding="utf-8")
+    src = path / "src"
+    src.mkdir(exist_ok=True)
+    (src / "main.ts").write_text("const x = import.meta.env.SECRET_KEY;\n",
+                                 encoding="utf-8")
+    return path
+
+
+def make_astro_repo(path: Path) -> Path:
+    """Repo Astro aplicable con output:server sin adapter → astro-004."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "package.json").write_text(json.dumps({
+        "name": "demo-astro",
+        "dependencies": {"astro": "^4.0.0"},
+        "type": "module",
+        "scripts": {"dev": "astro dev", "build": "astro build"},
+    }), encoding="utf-8")
+    (path / "astro.config.mjs").write_text(
+        "export default { output: \"server\" }\n", encoding="utf-8")
+    return path
+
+
+def make_remix_repo(path: Path) -> Path:
+    """Repo Remix aplicable sin config ni app/routes → varios findings."""
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "package.json").write_text(json.dumps({
+        "name": "demo-remix",
+        "dependencies": {"@remix-run/react": "^2.0.0"},
+        "scripts": {"build": "remix vite:build"},
+    }), encoding="utf-8")
+    (path / "app").mkdir(exist_ok=True)
+    return path
+
+
 def make_bun_repo(path: Path) -> Path:
     """Repo con bun.lock de texto (default Bun >=1.2) · regresión P3."""
     path.mkdir(parents=True, exist_ok=True)

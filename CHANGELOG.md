@@ -23,6 +23,11 @@ y este proyecto se adhiere a [SemVer 2.0.0](https://semver.org/lang/es/).
   `XEK_integridad`, `XEK_compliance-licencias`, `XEK_datos-criticos` (con sus
   tests de contrato). `XEK_sca` degrada a informativo si `osv-scanner` no está
   disponible. Cobertura ejecutable del catálogo: 13 skills.
+- Runners ejecutables (oleada 4, repo · frameworks/build): `XEK_nextjs`,
+  `XEK_vite`, `XEK_astro`, `XEK_remix` (con sus tests de contrato). Incorporan
+  **compuerta de aplicabilidad**: si el framework no se detecta emiten
+  `skipped:{razon:not_applicable}` y exit 0 (no-op limpio en repos ajenos).
+  Cobertura ejecutable del catálogo: 17 skills.
 - `xek/manifest@v2`: campo `host_huellas.distro_id` y gestores `poetry`,
   `bundler`, `composer`, `deno` en `repo.gestor_paquetes`.
 
