@@ -2,13 +2,21 @@
 slug: XEK_linux-peripherals
 ambito: Linux
 maestria_funcional: revisor
-estado: stub
-version: 0.6.0
+estado: borrador
+version: 0.7.0
 mejoras_ultima_edicion:
   - { v: 0.6.0, fecha: 2026-05-21, cambio: "fusión XEK_linux-audio + XEK_linux-bluetooth en una skill que recorre bus D-Bus único" }
+  - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador · fuentes reales (udev/input kernel docs), escalada R16 explícita, checks[] read-only firmware/input/USB" }
 
 objetivo: >
   Verificar postura de periféricos del host (audio PipeWire/PulseAudio/ALSA + Bluetooth BlueZ) mediante recorrido D-Bus unificado.
+
+fuentes_externas:
+  - { tipo: tool, nombre: "busctl",       version_min: "250",  licencia: "LGPL-2.1-or-later" }
+  - { tipo: tool, nombre: "bluetoothctl", version_min: "5.70", licencia: "GPL-2.0-only" }
+  - { tipo: tool, nombre: "pw-cli",       version_min: "1.0",  licencia: "MIT" }
+  - { tipo: tool, nombre: "jq",           version_min: "1.7",  licencia: "MIT" }
+conexiones_requeridas: []
 
 precondiciones_runtime:
   binarios:
@@ -26,16 +34,15 @@ precondiciones_runtime:
     - "$XDG_RUNTIME_DIR/xek-sandbox/XEK_linux-peripherals/"
   conexiones: []
 
-escalada:
-  adapter: "${XEK_SUDO:-sudo -A}"
-  capabilities_requeridas: []
-  fallback_sin_escalada: "no aplica · skill sin privilegios"
-  registrar_en_finding: true
+escalada_privilegio:
+  comando_template: "${XEK_SUDO:-sudo -A}"
+  cuando_aplica: "lectura de logs de firmware del kernel (dmesg) en hosts con dmesg restringido; sin escalada se omite el check de firmware y se reporta skipped"
 
 referencias_canonicas:
+  - { tipo: doc_oficial, url: "https://www.freedesktop.org/software/systemd/man/latest/udev.html", cobertura: "udev · enumeración y gestión de dispositivos" }
+  - { tipo: doc_oficial, url: "https://www.kernel.org/doc/html/latest/input/input.html", cobertura: "Linux kernel input subsystem" }
   - { tipo: doc_oficial, url: "https://docs.pipewire.org/", cobertura: "PipeWire API y modelo de objetos" }
   - { tipo: doc_oficial, url: "https://www.bluez.org/", cobertura: "BlueZ stack" }
-  - { tipo: doc_oficial, url: "https://www.freedesktop.org/wiki/Software/dbus/", cobertura: "D-Bus IPC bus" }
   - { tipo: estandar, url: "https://www.cisecurity.org/benchmark/distribution_independent_linux", cobertura: "CIS Distribution Independent Linux · 3.x services hardening" }
 verificar_referencias:
   cuando: "antes de bump de version_min de busctl o bluetoothctl"
@@ -72,6 +79,24 @@ checks:
     expected_exit: 0
     severity_default: info
     solo_modo: [sandbox, real]
+  - id: "peripherals-006"
+    descripcion: "Dispositivos de entrada (input) enumerados por el kernel"
+    command_template: "test -s /proc/bus/input/devices"
+    expected_exit: 0
+    severity_default: info
+    solo_modo: [dry-run, sandbox, real]
+  - id: "peripherals-007"
+    descripcion: "Dispositivos USB enumerados vía sysfs (read-only)"
+    command_template: "test \"$(ls -d /sys/bus/usb/devices/*/ 2>/dev/null | wc -l)\" -gt 0"
+    expected_exit: 0
+    severity_default: info
+    solo_modo: [sandbox, real]
+  - id: "peripherals-008"
+    descripcion: "Sin firmware solicitado por el kernel y no cargado (privilegiado · skip sin escalada)"
+    command_template: "${XEK_SUDO:-sudo -A} dmesg 2>/dev/null | grep -i 'firmware' | grep -iqv 'failed\\|missing' || echo no-priv-or-clean"
+    expected_exit: 0
+    severity_default: medium
+    solo_modo: [real]
 
 areas_criticas:
   permisos_user:
@@ -139,12 +164,68 @@ recorriendo el bus D-Bus de sesión y `/sys`. Sustituye a las skills
 separadas `XEK_linux-audio` y `XEK_linux-bluetooth` (fusión v0.6 por
 argumento de antítesis · ronda 001).
 
-# Estado
+# Uso · comentario encabezado (copiar al script)
 
-**Stub bootstrap v0.6.0** — frontmatter declarativo presente con `checks[]`
-tipados y `precondiciones_runtime` unificado. Implementación bash
-pendiente de Ronda 3b.
+```bash
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  XEK_linux-peripherals · v0.7.0 · 2026-06-20                 ║
+# ║  Función: verificar postura de periféricos (audio/BT/input/USB)║
+# ║  Variables entorno:                                          ║
+# ║    XEK_SUDO            comando de escalada (default: sudo -A) ║
+# ║    XDG_RUNTIME_DIR     base sandbox                          ║
+# ║  Uso:                                                        ║
+# ║    xek-linux-peripherals.sh --mode={dry-run|sandbox|real}   ║
+# ║  Exit codes:                                                ║
+# ║    0=clean · 1=findings · 2=config · 3=missing-mode · 4=ill ║
+# ╚══════════════════════════════════════════════════════════════╝
+```
+
+# Implementación referencia (bash · fuente de verdad)
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+# Escalada agnóstica del operador (R16)
+SUDO="${XEK_SUDO:-sudo -A}"
+# TODO: ejecutar los checks[] declarados en los 3 modos · read-only sobre D-Bus, sysfs e input.
+```
+
+# Adaptador Python
+
+```python
+#!/usr/bin/env python3
+"""XEK_linux-peripherals · adapter Python."""
+import subprocess, sys, pathlib
+script = pathlib.Path(__file__).with_name("xek-linux-peripherals.sh")
+sys.exit(subprocess.call(["bash", str(script), *sys.argv[1:]]))
+```
+
+# Adaptador zsh
+
+```zsh
+#!/usr/bin/env zsh
+emulate -L zsh
+exec bash "${0:A:h}/xek-linux-peripherals.sh" "$@"
+```
+
+# Verificación end-to-end (smoke test)
+
+```bash
+./scripts/xek-linux-peripherals.sh --mode=dry-run && echo "PASS dry-run"
+./scripts/xek-linux-peripherals.sh --mode=sandbox
+echo "exit=$?"
+```
+
+# Riesgos y mitigación
+
+| Riesgo | Mitigación |
+|---|---|
+| `dmesg` restringido (kernel.dmesg_restrict) | Check firmware privilegiado · skip+report sin escalada |
+| MAC Bluetooth en logs públicos | Hash de MAC en informe; nunca volcar crudo |
+| Host headless sin audio/BT | `aplicabilidad` filtra antes de invocar |
+| Claves de pairing en /var/lib/bluetooth | Reportar presencia; nunca imprimir contenido |
 
 # Bitácora evolución
 
 - **v0.6.0** (2026-05-21) — fusión declarada · estructura v0.6 con checks[].
+- **v0.7.0** (2026-06-20) — stub→borrador: fuentes reales, refs udev/input kernel, escalada `${XEK_SUDO}` explícita, checks input/USB/firmware read-only.
