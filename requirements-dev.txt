@@ -1,0 +1,4 @@
+# Dependencias de desarrollo · testera pytest
+# Instalar: python3 -m pip install -r requirements-dev.txt
+pytest>=8
+jsonschema>=4

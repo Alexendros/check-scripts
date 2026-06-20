@@ -24,3 +24,23 @@ jobs:
         run: |
           # En un repo real, aquí iría el validador
           echo "✅ Estructura validada"
+
+  pytest:
+    name: Testera pytest (runners XEK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias de test
+        run: pip install -r requirements-dev.txt
+
+      - name: Verificar dependencias de runtime de los runners
+        run: jq --version && git --version && bash --version | head -1
+
+      - name: pytest
+        run: pytest -q

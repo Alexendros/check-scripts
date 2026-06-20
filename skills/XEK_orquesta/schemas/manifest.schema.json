@@ -17,7 +17,7 @@
       "description": "Presente solo si target_tipo == 'repo'",
       "properties": {
         "tipo": { "type": "string", "enum": ["monorepo", "repo-simple", "library"] },
-        "gestor_paquetes": { "type": "string", "enum": ["pnpm", "npm", "yarn", "bun", "pip", "uv", "cargo", "go", "none"] },
+        "gestor_paquetes": { "type": "string", "enum": ["pnpm", "npm", "yarn", "bun", "deno", "pip", "uv", "poetry", "cargo", "go", "bundler", "composer", "none"] },
         "frameworks": {
           "type": "array",
           "items": {
@@ -64,6 +64,7 @@
       "description": "Presente solo si target_tipo == 'host'",
       "properties": {
         "distro_familia":    { "type": "string", "enum": ["arch", "debian", "fedora", "nixos", "alpine", "gentoo", "unknown"] },
+        "distro_id":         { "type": "string", "description": "ID crudo de /etc/os-release (ubuntu, mint, pop, ...)" },
         "init":              { "type": "string", "enum": ["systemd", "openrc", "runit", "unknown"] },
         "paquete_sys":       { "type": "array", "items": { "type": "string" } },
         "desktop_env":       { "type": "string", "enum": ["gnome", "kde", "hyprland", "xfce", "sway", "none"] },

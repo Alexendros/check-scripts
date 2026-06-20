@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  XEK_detecta-stack · v0.7.0                                    ║
+# ║  XEK_detecta-stack · v0.7.2                                    ║
 # ║  Función: detectar stack/host y emitir xek/manifest@v2         ║
 # ║                                                                ║
 # ║  Variables entorno:                                            ║
@@ -26,7 +26,7 @@
 set -euo pipefail
 
 SLUG="XEK_detecta-stack"
-VERSION="0.7.0"
+VERSION="0.7.2"
 MODE=""
 TARGET="${XEK_TARGET:-}"
 TARGET_TIPO_OVERRIDE=""
@@ -85,8 +85,12 @@ detect_tipo() {
     return
   fi
   # .git puede ser dir (repo normal) o fichero (worktree/submódulo) → -e cubre ambos.
+  # Incluye markers de monorepo/otros ecosistemas: un workspace-root sin package.json
+  # raíz seguía clasificándose como host por error.
   if [[ -e "$t/.git" ]] || [[ -f "$t/package.json" ]] || [[ -f "$t/pyproject.toml" ]] \
-     || [[ -f "$t/Cargo.toml" ]] || [[ -f "$t/go.mod" ]]; then
+     || [[ -f "$t/Cargo.toml" ]] || [[ -f "$t/go.mod" ]] \
+     || [[ -f "$t/pnpm-workspace.yaml" ]] || [[ -f "$t/composer.json" ]] \
+     || [[ -f "$t/Gemfile" ]] || [[ -f "$t/requirements.txt" ]]; then
     printf '%s' "repo"
     return
   fi
@@ -113,9 +117,13 @@ detect_langs() {
   local t="$1"
   local tmp langs=()
   tmp="$(mktemp)"
+  # Exclusiones alineadas con github-linguist/vendor.yml: no contar vendored/generated.
   find "$t" -maxdepth 6 \
     -not -path '*/node_modules/*' -not -path '*/.git/*' \
     -not -path '*/dist/*' -not -path '*/.next/*' -not -path '*/__pycache__/*' \
+    -not -path '*/vendor/*' -not -path '*/build/*' -not -path '*/coverage/*' \
+    -not -path '*/target/*' -not -path '*/.venv/*' -not -path '*/.yarn/*' \
+    -not -path '*/bower_components/*' \
     \( -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.go' \
        -o -name '*.rs' -o -name '*.java' -o -name '*.rb' -o -name '*.php' \) \
     2>/dev/null | head -200 > "$tmp" || true
@@ -143,15 +151,28 @@ detect_langs() {
 # ── repo · gestor de paquetes (enum del schema) ───────────────────
 detect_pm() {
   local t="$1"
-  [[ -f "$t/pnpm-lock.yaml" ]]    && { printf '%s' "pnpm";  return; }
-  [[ -f "$t/yarn.lock" ]]         && { printf '%s' "yarn";  return; }
-  [[ -f "$t/bun.lockb" ]]         && { printf '%s' "bun";   return; }
-  [[ -f "$t/package-lock.json" ]] && { printf '%s' "npm";   return; }
-  [[ -f "$t/Cargo.lock" ]]        && { printf '%s' "cargo"; return; }
-  [[ -f "$t/go.sum" ]] || [[ -f "$t/go.mod" ]] && { printf '%s' "go"; return; }
-  [[ -f "$t/uv.lock" ]]           && { printf '%s' "uv";    return; }
+  # Corepack: el campo packageManager declara el PM canónico (prioridad).
+  if [[ -f "$t/package.json" ]]; then
+    local pmfield
+    pmfield="$(jq -r '.packageManager // empty' "$t/package.json" 2>/dev/null | cut -d@ -f1 || true)"
+    case "$pmfield" in
+      pnpm|yarn|npm|bun) printf '%s' "$pmfield"; return ;;
+    esac
+  fi
+  [[ -f "$t/pnpm-lock.yaml" ]]    && { printf '%s' "pnpm";   return; }
+  [[ -f "$t/yarn.lock" ]]         && { printf '%s' "yarn";   return; }
+  # P3: Bun >=1.2 usa bun.lock (texto) por defecto, no bun.lockb.
+  { [[ -f "$t/bun.lockb" ]] || [[ -f "$t/bun.lock" ]]; } && { printf '%s' "bun"; return; }
+  [[ -f "$t/package-lock.json" ]] && { printf '%s' "npm";    return; }
+  [[ -f "$t/deno.lock" ]]         && { printf '%s' "deno";   return; }
+  [[ -f "$t/Cargo.lock" ]]        && { printf '%s' "cargo";  return; }
+  { [[ -f "$t/go.sum" ]] || [[ -f "$t/go.mod" ]]; } && { printf '%s' "go"; return; }
+  [[ -f "$t/uv.lock" ]]           && { printf '%s' "uv";     return; }
+  [[ -f "$t/poetry.lock" ]]       && { printf '%s' "poetry"; return; }
   { [[ -f "$t/pyproject.toml" ]] || [[ -f "$t/requirements.txt" ]]; } && { printf '%s' "pip"; return; }
-  [[ -f "$t/package.json" ]]      && { printf '%s' "npm";   return; }
+  [[ -f "$t/Gemfile.lock" ]] || [[ -f "$t/Gemfile" ]]         && { printf '%s' "bundler";  return; }
+  [[ -f "$t/composer.lock" ]] || [[ -f "$t/composer.json" ]]  && { printf '%s' "composer"; return; }
+  [[ -f "$t/package.json" ]]      && { printf '%s' "npm";     return; }
   printf '%s' "none"
 }
 
@@ -162,7 +183,7 @@ detect_frameworks() {
   jq '
     [ (.dependencies // {}) + (.devDependencies // {})
       | to_entries[]
-      | select(.key | test("^(next|react|vue|svelte|astro|remix|@remix-run/.*|@angular/core|solid-js|qwik)$"))
+      | select(.key | test("^(next|react|vue|svelte|@sveltejs/kit|astro|remix|@remix-run/.*|nuxt|@nuxt/.*|gatsby|expo|@angular/core|solid-js|qwik)$"))
       | { nombre: .key,
           version_min: (.value | tostring | ltrimstr("^") | ltrimstr("~") | ltrimstr(">=")) }
     ]
@@ -218,37 +239,61 @@ detect_infra() {
     '{docker:$docker, docker_compose:$docker_c, dokploy:$dokploy, vercel:$vercel, github_actions:$gh_actions}'
 }
 
+# Mapea un string de os-release (ID o ID_LIKE) a una familia del enum del schema.
+_map_distro_familia() {
+  case "$1" in
+    *arch*)                                   printf 'arch' ;;
+    *debian*|*ubuntu*)                        printf 'debian' ;;
+    *fedora*|*rhel*|*centos*|*rocky*|*alma*)  printf 'fedora' ;;
+    *nixos*)                                  printf 'nixos' ;;
+    *alpine*)                                 printf 'alpine' ;;
+    *gentoo*)                                 printf 'gentoo' ;;
+    *)                                        printf 'unknown' ;;
+  esac
+}
+
 # ── ds-005 · Detectar huellas de host (env + world-readable) ──────
 # Honra escalada.fallback_sin_escalada: huellas que requieran privilegio
 # y no estén disponibles → se marcan "skipped" en _skipped[] (no fallan).
 detect_host() {
-  local distro="unknown" init_sys="unknown" desktop="none" display="tty"
+  local distro="unknown" distro_id="unknown" init_sys="unknown" desktop="none" display="tty"
   local gpu="none" audio="none" bluetooth="none"
   local skipped=()
 
   if [[ -r /etc/os-release ]]; then
-    local id id_like base
+    local id id_like
     id="$(grep -E '^ID=' /etc/os-release | head -1 | cut -d= -f2 | tr -d '"' || true)"
     id_like="$(grep -E '^ID_LIKE=' /etc/os-release | head -1 | cut -d= -f2 | tr -d '"' || true)"
-    base="${id_like:-$id}"
-    case "$base" in
-      *arch*)                    distro="arch" ;;
-      *debian*|*ubuntu*)         distro="debian" ;;
-      *fedora*|*rhel*|*centos*)  distro="fedora" ;;
-      *nixos*)                   distro="nixos" ;;
-      *alpine*)                  distro="alpine" ;;
-      *gentoo*)                  distro="gentoo" ;;
-    esac
+    [[ -n "$id" ]] && distro_id="$id"
+    # Spec os-release: clasificar por ID; ID_LIKE solo si ID no se reconoce.
+    distro="$(_map_distro_familia "$id")"
+    [[ "$distro" == "unknown" && -n "$id_like" ]] && distro="$(_map_distro_familia "$id_like")"
   else
     skipped+=("os-release: no legible")
   fi
 
-  command -v systemctl >/dev/null 2>&1 && init_sys="systemd"
-  command -v rc-update >/dev/null 2>&1 && init_sys="openrc"
-  command -v runit     >/dev/null 2>&1 && init_sys="runit"
+  # init: /proc/1/comm es la señal primaria (qué corre como PID 1).
+  case "$(cat /proc/1/comm 2>/dev/null || true)" in
+    systemd)        init_sys="systemd" ;;
+    runit|runsvdir) init_sys="runit" ;;
+    openrc-init)    init_sys="openrc" ;;
+  esac
+  if [[ "$init_sys" == "unknown" ]]; then
+    command -v systemctl >/dev/null 2>&1 && init_sys="systemd"
+    command -v rc-update >/dev/null 2>&1 && init_sys="openrc"
+    command -v runit     >/dev/null 2>&1 && init_sys="runit"
+  fi
 
+  # P4: display server · loginctl cubre casos headless/startx donde las env vars faltan.
   if [[ -n "${WAYLAND_DISPLAY:-}" ]] || [[ "${XDG_SESSION_TYPE:-}" == "wayland" ]]; then
     display="wayland"
+  elif [[ "${XDG_SESSION_TYPE:-}" == "x11" ]]; then
+    display="x11"
+  elif command -v loginctl >/dev/null 2>&1 && [[ -n "${XDG_SESSION_ID:-}" ]]; then
+    case "$(loginctl show-session "${XDG_SESSION_ID}" -p Type --value 2>/dev/null || true)" in
+      wayland) display="wayland" ;;
+      x11)     display="x11" ;;
+    esac
   elif [[ -n "${DISPLAY:-}" ]]; then
     display="x11"
   fi
@@ -262,20 +307,46 @@ detect_host() {
     *sway*)     desktop="sway" ;;
   esac
 
-  # gpu_vendor: lspci es privilegio-libre pero puede no estar instalado.
-  if command -v lspci >/dev/null 2>&1; then
-    local pci
-    pci="$(lspci 2>/dev/null || true)"
-    grep -qi 'nvidia' <<<"$pci" && gpu="nvidia"
-    [[ "$gpu" == "none" ]] && grep -qiE 'amd|advanced micro devices.*(vga|display|3d)' <<<"$pci" && gpu="amd"
-    [[ "$gpu" == "none" ]] && grep -qiE 'intel.*(graphics|vga)' <<<"$pci" && gpu="intel"
-  else
-    skipped+=("gpu_vendor: lspci ausente · huella omitida")
+  # P5: gpu_vendor · sysfs primero (sin binarios, funciona headless), lspci fallback.
+  local vfile vid
+  for vfile in /sys/class/drm/card[0-9]*/device/vendor; do
+    [[ -r "$vfile" ]] || continue
+    vid="$(cat "$vfile" 2>/dev/null || true)"
+    case "$vid" in
+      0x10de) gpu="nvidia"; break ;;
+      0x1002) gpu="amd";    break ;;
+      0x8086) [[ "$gpu" == "none" ]] && gpu="intel" ;;
+    esac
+  done
+  if [[ "$gpu" == "none" ]]; then
+    if command -v lspci >/dev/null 2>&1; then
+      local pci
+      pci="$(lspci 2>/dev/null || true)"
+      grep -qi 'nvidia' <<<"$pci" && gpu="nvidia"
+      [[ "$gpu" == "none" ]] && grep -qiE 'amd|advanced micro devices.*(vga|display|3d)' <<<"$pci" && gpu="amd"
+      [[ "$gpu" == "none" ]] && grep -qiE 'intel.*(graphics|vga)' <<<"$pci" && gpu="intel"
+    else
+      skipped+=("gpu_vendor: sin /sys/class/drm legible ni lspci · huella omitida")
+    fi
   fi
 
-  command -v pactl      >/dev/null 2>&1 && audio="pipewire"
-  [[ "$audio" == "none" ]] && command -v pulseaudio >/dev/null 2>&1 && audio="pulseaudio"
-  [[ "$audio" == "none" ]] && command -v alsamixer  >/dev/null 2>&1 && audio="alsa"
+  # P1: audio · pactl existe igual con PulseAudio puro y con pipewire-pulse, así que
+  # NO distingue por sí solo. Preferir señales de "corriendo": socket → Server Name → PID.
+  if [[ -S "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/pipewire-0" ]]; then
+    audio="pipewire"
+  elif command -v pactl >/dev/null 2>&1 && pactl info >/dev/null 2>&1; then
+    if pactl info 2>/dev/null | grep -qiE 'Server Name:.*PipeWire'; then
+      audio="pipewire"
+    else
+      audio="pulseaudio"
+    fi
+  elif command -v pipewire >/dev/null 2>&1; then
+    audio="pipewire"
+  elif command -v pulseaudio >/dev/null 2>&1; then
+    audio="pulseaudio"
+  elif command -v alsamixer >/dev/null 2>&1 || [[ -d /proc/asound ]]; then
+    audio="alsa"
+  fi
 
   command -v bluetoothctl >/dev/null 2>&1 && bluetooth="bluez"
 
@@ -298,11 +369,11 @@ detect_host() {
   fi
 
   jq -n \
-    --arg df "$distro" --arg in "$init_sys" --arg de "$desktop" \
+    --arg df "$distro" --arg di "$distro_id" --arg in "$init_sys" --arg de "$desktop" \
     --arg ds "$display" --arg gp "$gpu" --arg au "$audio" --arg bt "$bluetooth" \
     --argjson ce "$engines_json" \
     --argjson sk "$skipped_json" \
-    '{distro_familia:$df, init:$in, desktop_env:$de, display_server:$ds,
+    '{distro_familia:$df, distro_id:$di, init:$in, desktop_env:$de, display_server:$ds,
       gpu_vendor:$gp, audio_server:$au, bluetooth:$bt, container_engines:$ce}
      + ( if ($sk | length) > 0 then {_skipped:$sk} else {} end )'
 }
@@ -407,7 +478,10 @@ if [[ "$MODE" == "sandbox" ]]; then
 fi
 
 if [[ "$MODE" == "real" ]]; then
-  LAST="$(find "$SANDBOX_BASE" -maxdepth 1 -mindepth 1 -mmin -1440 -type d 2>/dev/null | head -1 || true)"
+  # Excluir el run-id actual: 'mkdir -p $SANDBOX' (arriba) crea el dir antes de
+  # este gate, así que sin -not -name el find encontraría su propio directorio y
+  # el gate siempre pasaría. Solo cuenta un sandbox PREVIO.
+  LAST="$(find "$SANDBOX_BASE" -maxdepth 1 -mindepth 1 -type d -not -name "$RUN_ID" -mmin -1440 2>/dev/null | head -1 || true)"
   if [[ -z "$LAST" && -z "$OVERRIDE_GATE" ]]; then
     echo "gate: sandbox previo no encontrado en 24h · usar --override-gate=AUTO_<ts>" >&2
     exit 2
