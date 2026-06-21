@@ -133,6 +133,59 @@ def make_remix_repo(path: Path) -> Path:
     return path
 
 
+def make_html_a11y_pobre(path: Path) -> Path:
+    """HTML con barreras de accesibilidad → a11y-001/002/003/005/006/008."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "<html><head><title>t</title></head><body>\n"
+        "<h1>A</h1><h1>B</h1>\n"
+        "<img src=\"x.png\">\n"
+        "<input type=\"text\">\n"
+        "<div role=\"bogus\">x</div>\n"
+        "</body></html>\n", encoding="utf-8")
+    return path
+
+
+def make_html_seo_pobre(path: Path) -> Path:
+    """HTML pobre en SEO → seo-001/002/003/006/007."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "<html><head></head><body>\n"
+        "<script type=\"application/ld+json\">{bad json}</script>\n"
+        "</body></html>\n", encoding="utf-8")
+    return path
+
+
+def make_html_perf_pobre(path: Path) -> Path:
+    """HTML pobre en performance → perf-001/002/003/004/005."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "<html><head></head><body>\n"
+        "<img src=\"a.png\"><img src=\"b.png\">\n"
+        "<script src=\"x.js\"></script>\n"
+        "</body></html>\n", encoding="utf-8")
+    return path
+
+
+def make_html_cookies(path: Path) -> Path:
+    """HTML con tracking embebido y sin banner/enlace → cookies-001/006/007."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "<html><body>\n"
+        "<script src=\"https://www.googletagmanager.com/gtag/js?id=X\"></script>\n"
+        "</body></html>\n", encoding="utf-8")
+    return path
+
+
+def make_headers_inseguras(path: Path) -> Path:
+    """Cabeceras con cookie de tracking insegura y Max-Age > 1 año."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "HTTP/2 200\n"
+        "set-cookie: _ga=GA1.2.3; Path=/; Max-Age=63072000\n", encoding="utf-8")
+    return path
+
+
 def make_bun_repo(path: Path) -> Path:
     """Repo con bun.lock de texto (default Bun >=1.2) · regresión P3."""
     path.mkdir(parents=True, exist_ok=True)
