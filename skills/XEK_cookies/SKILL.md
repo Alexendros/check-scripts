@@ -3,11 +3,12 @@ slug: XEK_cookies
 ambito: Cookies
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter R4+R7 + modos + checks[] tipados + fuentes canónicas reales (AEPD guía cookies + MDN Set-Cookie)" }
+  - { v: 0.7.1, fecha: 2026-06-21, cambio: "runner real scripts/xek-cookies.sh: emite xek/finding@v1 (8 checks cookies-001..008 (banner CMP, Secure/HttpOnly/SameSite, tracking, scripts, política, Max-Age); fix de drift en cookies-008 (! erróneo en patrón awk)) con compuerta de aplicabilidad (skipped:not_applicable) y guardas de red/xmllint, gate real, shellcheck-clean, testado (tests/test_cookies.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar cumplimiento estatico de cookies (banner de consentimiento, flags
@@ -135,7 +136,7 @@ checks:
     solo_modo: [sandbox, real]
   - id: "cookies-008"
     descripcion: "Ninguna cookie de sesion declara expiracion persistente excesiva (heuristica Max-Age > 1 ano)"
-    command_template: "! grep -iE '^set-cookie:' '$HEADERS' | grep -oiE 'Max-Age=[0-9]+' | grep -oiE '[0-9]+' | awk '$0 > 31536000 {bad=1} END {exit bad+0}'"
+    command_template: "grep -iE '^set-cookie:' '$HEADERS' | grep -oiE 'Max-Age=[0-9]+' | grep -oiE '[0-9]+' | awk '$0 > 31536000 {bad=1} END {exit bad+0}'"
     expected_exit: 0
     severity_default: low
     solo_modo: [sandbox, real]
@@ -194,76 +195,19 @@ cookies de la AEPD y la semantica `Set-Cookie` documentada por MDN.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-cookies.sh`](scripts/xek-cookies.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_cookies.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla. Target: artefacto HTML (+ --headers para cookies). Incluye **compuerta de aplicabilidad**: sin artefacto
+HTML emite `skipped:{razon:not_applicable}` y exit 0. Los checks que requieren
+el sitio en vivo (`curl`) o `xmllint` se omiten si falta el input/binario. El
+frontmatter `checks[]` es la especificación declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_cookies"
-VERSION="0.7.0"
-MODE=""
-URL="${XEK_TARGET_URL:-}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*) MODE="${1#*=}"; shift ;;
-    --url)    URL="$2"; shift 2 ;;
-    *)        echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash curl grep test; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin absent" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: cookies-001..cookies-008 (cmp, Secure, HttpOnly, SameSite, pre-consent trackers, policy, max-age)"
-  exit 0
-fi
-
-preflight || exit 2
-[[ -z "$URL" ]] && { echo "missing --url" >&2; exit 2; }
-
-SANDBOX="${XDG_RUNTIME_DIR:-/tmp}/xek-sandbox/${SLUG}/$(date +%s)-$$"
-mkdir -p "$SANDBOX"
-HTML="$SANDBOX/page.html"
-HEADERS="$SANDBOX/page.headers"
-
-curl -fsSL -D "$HEADERS" "$URL" -o "$HTML" || { echo "fetch failed: $URL" >&2; exit 1; }
-
-FINDINGS=0
-emit() { echo "  - { check: $1, severity: $2, status: $3 }"; }
-
-run_check() {
-  local id="$1" sev="$2"; shift 2
-  if "$@" >/dev/null 2>&1; then emit "$id" "$sev" pass
-  else emit "$id" "$sev" fail; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run_check cookies-001 high   bash -c "grep -qiE '(cookie-consent|cookie-banner|cmp|consent|aceptar cookies|cookiebot|onetrust)' '$HTML'"
-run_check cookies-002 high   bash -c "! grep -iE '^set-cookie:' '$HEADERS' | grep -viqE 'Secure'"
-run_check cookies-004 medium bash -c "! grep -iE '^set-cookie:' '$HEADERS' | grep -viqE 'SameSite=(Lax|Strict|None)'"
-run_check cookies-005 high   bash -c "! grep -iE '^set-cookie:' '$HEADERS' | grep -qiE '(_ga|_gid|_fbp|IDE)'"
-run_check cookies-007 low    bash -c "grep -qiE '<a[^>]+href=[^>]*(cookies|privacidad|privacy|politica)' '$HTML'"
-
-if [[ "$MODE" == "sandbox" ]]; then
-  echo "sandbox: $SANDBOX"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
-
-if [[ "$MODE" == "real" ]]; then
-  OUT="${XEK_CUADERNO:-$HOME/.claude/cuadernos/xek-cluster}/artefactos/${SLUG}/$(date +%Y-%m-%d)"
-  mkdir -p "$OUT"
-  cp "$HTML" "$OUT/page.html"
-  echo "informe: $OUT"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-cookies.sh --mode {dry-run|sandbox|real} --target <html> [...] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings / no aplica · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)

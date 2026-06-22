@@ -3,11 +3,12 @@ slug: XEK_a11y-web
 ambito: A11y
 maestria_funcional: revisor
 estado: borrador
-version: 0.7.0
+version: 0.7.1
 mejoras_ultima_edicion:
   - { v: 0.0.1, fecha: 2026-05-20, cambio: "bootstrap stub · pendiente implementación" }
   - { v: 0.6.1, fecha: 2026-05-22, cambio: "degradado borrador→stub per síntesis Ronda 002 (commit deuda v0.6)" }
   - { v: 0.7.0, fecha: 2026-06-20, cambio: "stub→borrador: frontmatter R4+R7 + modos + checks[] tipados + fuentes canónicas reales (WCAG 2.2 + ARIA APG)" }
+  - { v: 0.7.1, fecha: 2026-06-21, cambio: "runner real scripts/xek-a11y-web.sh: emite xek/finding@v1 (8 checks a11y-001..008 (html lang, img alt, h1 único, jerarquía headings, roles ARIA, input label, well-formed[xmllint], nav)) con compuerta de aplicabilidad (skipped:not_applicable) y guardas de red/xmllint, gate real, shellcheck-clean, testado (tests/test_a11y_web.py) · SKILL.md deja de duplicar el bash (single source of truth)" }
 
 objetivo: >
   Verificar accesibilidad estatica de una pagina HTML (lang, alt, orden de
@@ -192,75 +193,19 @@ de WCAG 2.2 y de la ARIA Authoring Practices Guide.
 
 # Implementacion referencia (bash · fuente de verdad)
 
+La implementación ejecutable y **única fuente de verdad** es
+[`scripts/xek-a11y-web.sh`](scripts/xek-a11y-web.sh) (v0.7.1, shellcheck-clean, cubierto por
+`tests/test_a11y_web.py`). Emite `xek/finding@v1`: un finding por cada check que
+falla. Target: artefacto HTML. Incluye **compuerta de aplicabilidad**: sin artefacto
+HTML emite `skipped:{razon:not_applicable}` y exit 0. Los checks que requieren
+el sitio en vivo (`curl`) o `xmllint` se omiten si falta el input/binario. El
+frontmatter `checks[]` es la especificación declarativa; el script no se duplica aquí.
+
+Firma y contrato:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-SLUG="XEK_a11y-web"
-VERSION="0.7.0"
-MODE=""
-URL="${XEK_TARGET_URL:-}"
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --mode=*) MODE="${1#*=}"; shift ;;
-    --url)    URL="$2"; shift 2 ;;
-    *)        echo "ill-call: $1" >&2; exit 4 ;;
-  esac
-done
-
-[[ -z "$MODE" ]] && { echo "missing --mode" >&2; exit 3; }
-
-preflight() {
-  for bin in bash curl grep xmllint; do
-    command -v "$bin" >/dev/null 2>&1 || { echo "PREFLIGHT FAIL: $bin absent" >&2; return 1; }
-  done
-}
-
-if [[ "$MODE" == "dry-run" ]]; then
-  echo "## ${SLUG} v${VERSION} · plan dry-run"
-  preflight || exit 2
-  echo "checks: a11y-001..a11y-008 (lang, alt, h1, orden headings, roles ARIA, labels, parse, landmark)"
-  exit 0
-fi
-
-preflight || exit 2
-[[ -z "$URL" ]] && { echo "missing --url" >&2; exit 2; }
-
-SANDBOX="${XDG_RUNTIME_DIR:-/tmp}/xek-sandbox/${SLUG}/$(date +%s)-$$"
-mkdir -p "$SANDBOX"
-HTML="$SANDBOX/page.html"
-
-curl -fsSL "$URL" -o "$HTML" || { echo "fetch failed: $URL" >&2; exit 1; }
-
-FINDINGS=0
-emit() { echo "  - { check: $1, severity: $2, status: $3 }"; }
-
-run_check() {
-  local id="$1" sev="$2"; shift 2
-  if "$@" >/dev/null 2>&1; then emit "$id" "$sev" pass
-  else emit "$id" "$sev" fail; FINDINGS=$((FINDINGS+1)); fi
-}
-
-echo "findings:"
-run_check a11y-001 high   bash -c "grep -qiE '<html[^>]+lang=.[a-z]' '$HTML'"
-run_check a11y-002 high   bash -c "! grep -oiE '<img[^>]*>' '$HTML' | grep -viqE 'alt='"
-run_check a11y-003 medium bash -c "test \"\$(grep -oiE '<h1[ >]' '$HTML' | wc -l)\" -eq 1"
-run_check a11y-006 medium bash -c "! grep -oiE '<input[^>]*>' '$HTML' | grep -viqE '(id=|aria-label|aria-labelledby|type=.hidden|type=.submit|type=.button)'"
-run_check a11y-008 low    bash -c "grep -qiE '<nav[ >]|role=.navigation.' '$HTML'"
-
-if [[ "$MODE" == "sandbox" ]]; then
-  echo "sandbox: $SANDBOX"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
-
-if [[ "$MODE" == "real" ]]; then
-  OUT="${XEK_CUADERNO:-$HOME/.claude/cuadernos/xek-cluster}/artefactos/${SLUG}/$(date +%Y-%m-%d)"
-  mkdir -p "$OUT"
-  cp "$HTML" "$OUT/page.html"
-  echo "informe: $OUT"
-  [[ "$FINDINGS" -eq 0 ]] && exit 0 || exit 1
-fi
+xek-a11y-web.sh --mode {dry-run|sandbox|real} --target <html> [...] [--override-gate=AUTO_<ts>]
+# exit: 0 sin findings / no aplica · 1 findings · 2 config · 3 falta --mode · 4 ill-call
 ```
 
 # Adaptador Python (encapsulado vendoreable)

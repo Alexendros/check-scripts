@@ -28,6 +28,18 @@ y este proyecto se adhiere a [SemVer 2.0.0](https://semver.org/lang/es/).
   **compuerta de aplicabilidad**: si el framework no se detecta emiten
   `skipped:{razon:not_applicable}` y exit 0 (no-op limpio en repos ajenos).
   Cobertura ejecutable del catálogo: 17 skills.
+- Runners ejecutables (oleada 5, web/artefacto HTML): `XEK_a11y-web`, `XEK_seo`,
+  `XEK_perf-web`, `XEK_cookies` (con sus tests de contrato). Operan sobre un
+  artefacto HTML (`--target`) con cabeceras (`--headers`) o URL (`--base-url`/
+  `--url`) opcionales; los checks de red (`curl`) y `xmllint` se omiten si falta
+  el input/binario. Cobertura ejecutable del catálogo: 21 skills.
+
+### Corregido
+
+- `XEK_cookies` (cookies-008): el `!` inicial invertía la semántica del patrón
+  `awk` (Max-Age > 1 año no se detectaba). Eliminado en runner y frontmatter.
+- `XEK_seo` (seo-006): falso positivo de "JSON-LD inválido" en páginas sin
+  JSON-LD. Añadida guarda de presencia en runner y frontmatter.
 - `xek/manifest@v2`: campo `host_huellas.distro_id` y gestores `poetry`,
   `bundler`, `composer`, `deno` en `repo.gestor_paquetes`.
 
